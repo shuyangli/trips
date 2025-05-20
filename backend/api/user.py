@@ -5,6 +5,8 @@ from pydantic import BaseModel, Field
 
 
 class UserStatus(StrEnum):
+    UNKNOWN = "unknown"
+    UNVERIFIED = "unverified"
     ACTIVE = "active"
     DEACTIVATED = "deactivated"
 

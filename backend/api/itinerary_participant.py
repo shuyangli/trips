@@ -11,7 +11,7 @@ class ItineraryParticipantStatus(StrEnum):
     LEFT = "left"
 
 
-class SharedItineraryItemParticipant(BaseModel):
+class ItineraryParticipant(BaseModel):
     # Compound primary key: (itinerary_item_id, user_id)
     # FK to ItineraryItem.itinerary_item_id
     itinerary_item_id: str

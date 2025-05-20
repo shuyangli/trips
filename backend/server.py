@@ -30,7 +30,7 @@ app.add_middleware(
 
 @app.get("/api/v1/hello")
 async def hello():
-    return {"message": "Hello World"}
+    return {"message": "Hello World um test test?"}
 
 
 @app.get("/healthz")

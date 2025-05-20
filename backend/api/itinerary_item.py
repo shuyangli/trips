@@ -6,6 +6,7 @@ from pydantic import BaseModel, Field
 
 
 class ItineraryItemType(StrEnum):
+    UNKNOWN = "unknown"
     FLIGHT = "flight"
     # Trains and buses
     GROUND_TRANSPORTATION = "ground"
