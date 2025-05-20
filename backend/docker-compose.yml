@@ -1,0 +1,38 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8000:8000
+    environment:
+      - PORT=8000
+      - DATABASE_URL=postgresql://postgres:postgres@database:5432/trips
+    networks:
+      - trips-network
+    volumes:
+      - .:/backend
+    depends_on:
+      - database
+    command: uvicorn server:app --host 0.0.0.0 --port 8000 --reload
+
+  database:
+    image: postgres:17
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=trips
+    networks:
+      - trips-network
+    volumes:
+      - trips-db:/var/lib/postgresql/data
+
+volumes:
+  trips-db:
+
+
+networks:
+  trips-network:
+    driver: bridge
