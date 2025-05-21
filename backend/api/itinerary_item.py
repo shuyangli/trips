@@ -102,7 +102,7 @@ class ItineraryItem(BaseModel):
 
     # Perhaps this should support attachments too for things like receipts or tickets.
 
-    created_at: datetime
-    updated_at: datetime
+    created_at: int
+    updated_at: int
 
     # Maybe keep track of price too?

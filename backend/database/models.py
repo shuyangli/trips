@@ -11,7 +11,7 @@ from sqlalchemy import (
     Float,
     Enum as SQLEnum,
 )
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP
 from sqlalchemy.orm import declarative_base, relationship
 
 Base = declarative_base()
@@ -38,9 +38,11 @@ class User(Base):
         nullable=False,
         default=UserStatus.UNVERIFIED,
     )
-    created_at = Column(DateTime, nullable=False, default=datetime.now(timezone.utc))
+    created_at = Column(
+        TIMESTAMP(timezone=True), nullable=False, default=datetime.now(timezone.utc)
+    )
     updated_at = Column(
-        DateTime,
+        TIMESTAMP(timezone=True),
         nullable=False,
         default=datetime.now(timezone.utc),
         onupdate=datetime.now(timezone.utc),
@@ -62,11 +64,13 @@ class Trip(Base):
     created_by_user_id = Column(
         UUID(as_uuid=True), ForeignKey("users.user_id"), nullable=False
     )
-    start_date = Column(DateTime, nullable=True)
-    end_date = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, nullable=False, default=datetime.now(timezone.utc))
+    start_date = Column(DateTime(timezone=True), nullable=True)
+    end_date = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(
+        TIMESTAMP(timezone=True), nullable=False, default=datetime.now(timezone.utc)
+    )
     updated_at = Column(
-        DateTime,
+        TIMESTAMP(timezone=True),
         nullable=False,
         default=datetime.now(timezone.utc),
         onupdate=datetime.now(timezone.utc),
@@ -97,9 +101,11 @@ class TripParticipant(Base):
         nullable=False,
         default=TripParticipantStatus.UNKNOWN,
     )
-    created_at = Column(DateTime, nullable=False, default=datetime.now(timezone.utc))
+    created_at = Column(
+        TIMESTAMP(timezone=True), nullable=False, default=datetime.now(timezone.utc)
+    )
     updated_at = Column(
-        DateTime,
+        TIMESTAMP(timezone=True),
         nullable=False,
         default=datetime.now(timezone.utc),
         onupdate=datetime.now(timezone.utc),
@@ -119,11 +125,13 @@ class TripSegment(Base):
     description = Column(String, nullable=False)
     latitude = Column(Float, nullable=True)
     longitude = Column(Float, nullable=True)
-    start_date = Column(DateTime, nullable=True)
-    end_date = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, nullable=False, default=datetime.now(timezone.utc))
+    start_date = Column(DateTime(timezone=True), nullable=True)
+    end_date = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(
+        TIMESTAMP(timezone=True), nullable=False, default=datetime.now(timezone.utc)
+    )
     updated_at = Column(
-        DateTime,
+        TIMESTAMP(timezone=True),
         nullable=False,
         default=datetime.now(timezone.utc),
         onupdate=datetime.now(timezone.utc),
@@ -151,14 +159,16 @@ class ItineraryItem(Base):
         UUID(as_uuid=True), ForeignKey("users.user_id"), nullable=False
     )
     type = Column(SQLEnum(ItineraryItemType, create_type=False), nullable=False)
-    itinerary_datetime = Column(DateTime, nullable=True)
+    itinerary_datetime = Column(DateTime(timezone=True), nullable=True)
     booking_reference = Column(String, nullable=True)
     booking_url = Column(String, nullable=True)
     notes = Column(String, nullable=True)
     raw_details_json = Column(JSON, nullable=True)
-    created_at = Column(DateTime, nullable=False, default=datetime.now(timezone.utc))
+    created_at = Column(
+        TIMESTAMP(timezone=True), nullable=False, default=datetime.now(timezone.utc)
+    )
     updated_at = Column(
-        DateTime,
+        TIMESTAMP(timezone=True),
         nullable=False,
         default=datetime.now(timezone.utc),
         onupdate=datetime.now(timezone.utc),
@@ -192,9 +202,11 @@ class ItineraryParticipant(Base):
         nullable=False,
         default=ItineraryParticipantStatus.UNKNOWN,
     )
-    created_at = Column(DateTime, nullable=False, default=datetime.now(timezone.utc))
+    created_at = Column(
+        TIMESTAMP(timezone=True), nullable=False, default=datetime.now(timezone.utc)
+    )
     updated_at = Column(
-        DateTime,
+        TIMESTAMP(timezone=True),
         nullable=False,
         default=datetime.now(timezone.utc),
         onupdate=datetime.now(timezone.utc),

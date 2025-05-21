@@ -25,5 +25,5 @@ class User(BaseModel):
     # User ID from the OAuth provider
     oauth_provider_user_id: str | None = None
 
-    created_at: datetime
-    updated_at: datetime
+    created_at: int
+    updated_at: int

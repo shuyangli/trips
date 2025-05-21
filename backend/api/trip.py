@@ -15,5 +15,5 @@ class Trip(BaseModel):
     start_date: datetime | None = None
     end_date: datetime | None = None
 
-    created_at: datetime
-    updated_at: datetime
+    created_at: int
+    updated_at: int

@@ -20,5 +20,5 @@ class ItineraryParticipant(BaseModel):
 
     status: ItineraryParticipantStatus
 
-    created_at: datetime
-    updated_at: datetime
+    created_at: int
+    updated_at: int

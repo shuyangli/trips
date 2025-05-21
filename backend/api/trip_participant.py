@@ -20,5 +20,5 @@ class TripParticipant(BaseModel):
 
     status: TripParticipantStatus
 
-    created_at: datetime
-    updated_at: datetime
+    created_at: int
+    updated_at: int
