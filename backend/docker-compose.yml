@@ -8,6 +8,7 @@ services:
     environment:
       - PORT=8000
       - DATABASE_URL=postgresql://postgres:postgres@database:5432/trips
+      - GOOGLE_APPLICATION_CREDENTIALS=/backend/firebase-adminsdk-key.json
     networks:
       - trips-network
     volumes:

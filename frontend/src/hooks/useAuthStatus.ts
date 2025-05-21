@@ -1,38 +1,49 @@
 import { useEffect, useState } from 'react';
 import { auth } from '../firebase';
 import { onAuthStateChanged, type User } from 'firebase/auth';
+import axios from 'axios';
 
 export interface AuthStatus {
     user: User | null;
+    idToken: string | null;
     loading: boolean;
+}
+
+async function maybeCreateUserInBackend(idToken: string) {
+    const response = await axios.post(import.meta.env.VITE_BACKEND_BASE_URL + '/api/v1/auth/update-user', {
+        token: idToken,
+    });
+    return response.data;
 }
 
 export const useAuthStatus = () => {
     const [authStatus, setAuthStatus] = useState<AuthStatus>({
         user: null,
+        idToken: null,
         loading: true,
     });
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-            setAuthStatus({
-                user: currentUser,
-                loading: false,
-            });
             if (currentUser) {
-                console.log("User is signed in:", currentUser);
-                // You can get the ID token here if needed for your backend
                 currentUser.getIdToken()
                     .then(token => {
-                        console.log("Firebase ID Token:", token);
-                        // TODO: Send this token to your backend for verification if necessary
+                        maybeCreateUserInBackend(token);
+                        setAuthStatus({
+                            user: currentUser,
+                            idToken: token,
+                            loading: false
+                        });
                     });
             } else {
-                console.log("User is signed out");
+                setAuthStatus({
+                    user: currentUser,
+                    idToken: null,
+                    loading: false,
+                });
             }
         });
 
-        // Cleanup subscription on unmount
         return () => unsubscribe();
     }, []);
     return authStatus;

@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Any
 import uuid
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class ItineraryItemType(StrEnum):
@@ -102,7 +102,9 @@ class ItineraryItem(BaseModel):
 
     # Perhaps this should support attachments too for things like receipts or tickets.
 
-    created_at: int
-    updated_at: int
+    created_at: datetime
+    updated_at: datetime
 
     # Maybe keep track of price too?
+
+    model_config = ConfigDict(from_attributes=True, extra="forbid")

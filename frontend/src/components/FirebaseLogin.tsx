@@ -5,25 +5,30 @@ import 'firebaseui/dist/firebaseui.css';
 import { auth } from '../firebase';
 import { AuthStatusContext } from '../contexts/AuthContext';
 
+
 const FirebaseLogin = () => {
     const { user, loading } = useContext(AuthStatusContext);
 
     useEffect(() => {
         const ui = firebaseui.auth.AuthUI.getInstance() || new firebaseui.auth.AuthUI(auth);
-        const uiConfig = {
-            signInSuccessUrl: '/',
+        const uiConfig: firebaseui.auth.Config = {
             signInOptions: [
                 firebase.auth.GoogleAuthProvider.PROVIDER_ID,
             ],
+            callbacks: {
+                signInSuccessWithAuthResult: () => {
+                    // Return false to prevent redirect after sign in.
+                    return false;
+                },
+            },
             signInFlow: 'popup',
         };
 
-        // Check if the FirebaseUI widget is already rendered.
         const firebaseUiContainer = document.getElementById('firebaseui-auth-container');
         if (firebaseUiContainer && firebaseUiContainer.childElementCount === 0) {
             ui.start('#firebaseui-auth-container', uiConfig);
         }
-    }, [user, loading]);
+    }, [user]);
 
     if (loading) {
         return <div>Loading...</div>;

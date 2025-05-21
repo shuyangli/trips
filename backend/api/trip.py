@@ -1,6 +1,6 @@
 from datetime import datetime
 import uuid
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class Trip(BaseModel):
@@ -15,5 +15,7 @@ class Trip(BaseModel):
     start_date: datetime | None = None
     end_date: datetime | None = None
 
-    created_at: int
-    updated_at: int
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True, extra="forbid")

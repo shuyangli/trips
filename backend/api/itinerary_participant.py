@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import StrEnum
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class ItineraryParticipantStatus(StrEnum):
@@ -20,5 +20,7 @@ class ItineraryParticipant(BaseModel):
 
     status: ItineraryParticipantStatus
 
-    created_at: int
-    updated_at: int
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True, extra="forbid")

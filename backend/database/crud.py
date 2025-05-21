@@ -2,8 +2,9 @@ from datetime import datetime, timezone
 from typing import List, Optional
 from uuid import UUID
 from sqlalchemy.orm import Session
+from sqlalchemy import update
 
-from models import (
+from database.models import (
     User,
     Trip,
     TripParticipant,
@@ -22,14 +23,18 @@ def create_user(
     db: Session,
     email: str,
     password_hash: str,
-    full_name: str,
+    given_name: str,
+    family_name: str,
+    profile_picture_url: Optional[str] = None,
     oauth_provider: Optional[str] = None,
     oauth_provider_user_id: Optional[str] = None,
 ) -> User:
     db_user = User(
         email=email,
         password_hash=password_hash,
-        full_name=full_name,
+        given_name=given_name,
+        family_name=family_name,
+        profile_picture_url=profile_picture_url,
         oauth_provider=oauth_provider,
         oauth_provider_user_id=oauth_provider_user_id,
     )
@@ -52,7 +57,8 @@ def update_user_status(
 ) -> Optional[User]:
     user = get_user(db, user_id)
     if user:
-        user.status = status
+        stmt = update(User).where(User.user_id == user_id).values(status=status.value)
+        db.execute(stmt)
         db.commit()
         db.refresh(user)
     return user
@@ -115,7 +121,14 @@ def update_participant_status(
         .first()
     )
     if participant:
-        participant.status = status
+        stmt = (
+            update(TripParticipant)
+            .where(
+                TripParticipant.trip_id == trip_id, TripParticipant.user_id == user_id
+            )
+            .values(status=status.value)
+        )
+        db.execute(stmt)
         db.commit()
         db.refresh(participant)
     return participant
@@ -199,29 +212,3 @@ def add_itinerary_participant(
     db.commit()
     db.refresh(db_participant)
     return db_participant
-
-
-def update_itinerary_participant_status(
-    db: Session,
-    itinerary_item_id: UUID,
-    user_id: UUID,
-    status: ItineraryParticipantStatus,
-) -> Optional[ItineraryParticipant]:
-    participant = (
-        db.query(ItineraryParticipant)
-        .filter(
-            ItineraryParticipant.itinerary_item_id == itinerary_item_id,
-            ItineraryParticipant.user_id == user_id,
-        )
-        .first()
-    )
-    if participant:
-        participant.update(
-            {
-                ItineraryParticipant.status: status,
-                ItineraryParticipant.updated_at: datetime.now(timezone.utc),
-            }
-        )
-        db.commit()
-        db.refresh(participant)
-    return participant

@@ -30,7 +30,9 @@ class User(Base):
     user_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     email = Column(String, unique=True, nullable=False)
     password_hash = Column(String, nullable=False)
-    full_name = Column(String, nullable=False)
+    given_name = Column(String, nullable=False)
+    family_name = Column(String, nullable=False)
+    profile_picture_url = Column(String, nullable=True)
     oauth_provider = Column(String, nullable=True)
     oauth_provider_user_id = Column(String, nullable=True)
     status = Column(
