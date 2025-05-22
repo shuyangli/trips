@@ -10,7 +10,7 @@ export interface AuthStatus {
 
 function maybeCreateUserInBackend() {
     // Not sure if this is still needed if we're injecting the token on the header.
-    axiosInstance.post('/api/v1/auth/update-user');
+    axiosInstance.post('/api/v1/signin');
 }
 
 export const useAuthStatus = () => {

@@ -5,16 +5,15 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
-from auth import auth
 import logging
+
+from src.api.v1 import signin, trip
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
 load_dotenv()
-
-app = FastAPI()
 
 
 @asynccontextmanager
@@ -33,8 +32,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
-app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
+app.include_router(signin.router, tags=["auth"])
+app.include_router(trip.router, prefix="/api/v1", tags=["trip"])
 
 
 @app.get("/healthz")

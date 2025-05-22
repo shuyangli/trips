@@ -15,7 +15,7 @@ services:
       - .:/backend
     depends_on:
       - database
-    command: uvicorn server:app --host 0.0.0.0 --port 8000 --reload
+    command: uvicorn src.server:app --host 0.0.0.0 --port 8000 --reload
 
   database:
     image: postgres:17
