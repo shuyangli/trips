@@ -28,7 +28,7 @@ const FirebaseLogin = () => {
         if (firebaseUiContainer && firebaseUiContainer.childElementCount === 0) {
             ui.start('#firebaseui-auth-container', uiConfig);
         }
-    }, [user]);
+    }, [user, loading]);
 
     if (loading) {
         return <div>Loading...</div>;

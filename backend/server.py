@@ -6,6 +6,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from auth import auth
+import logging
+
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 load_dotenv()
 
@@ -30,11 +35,6 @@ app.add_middleware(
 
 # Include routers
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
-
-
-@app.get("/api/v1/hello")
-async def hello():
-    return {"message": "Hello World um test test?"}
 
 
 @app.get("/healthz")
