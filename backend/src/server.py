@@ -15,11 +15,9 @@ logging.basicConfig(
 
 load_dotenv()
 
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     yield
-
 
 app = FastAPI(title="Trips", lifespan=lifespan)
 
@@ -35,11 +33,9 @@ app.add_middleware(
 app.include_router(signin.router, tags=["auth"])
 app.include_router(trip.router, prefix="/api/v1", tags=["trip"])
 
-
 @app.get("/healthz")
 async def health_check():
     return {"status": "ok"}
-
 
 if __name__ == "__main__":
     port = int(os.getenv("PORT", 8000))

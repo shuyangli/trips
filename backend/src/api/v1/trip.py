@@ -1,33 +1,34 @@
-"""API routes to manage trips."""
-
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from uuid import UUID
+import uuid
+from datetime import datetime
 
-from src.database.models import User
-from src.database.config import get_db
-from src.database.crud import get_user_trips
-from src.auth import get_current_user
+from backend.src.database.config import get_db
+from backend.src.models.trip import Trip
+from backend.src.schemas.trip import TripCreate, TripResponse
 
 router = APIRouter()
 
+@router.post("/trips", response_model=TripResponse)
+def create_trip(trip: TripCreate, db: Session = Depends(get_db)):
+    # Check if the user exists
+    existing_user = db.query(User).filter(User.user_id == trip.created_by_user_id).first()
+    if not existing_user:
+        raise HTTPException(status_code=404, detail="User not found")
 
-# What we need here:
-# - Get all future trips for a user
-# - Get all trips for a user between specific dates
-# - Create a trip
-# - Update a trip
-# - Delete a trip
-# - Get a trip including all itinerary items
+    # Create a new trip
+    db_trip = Trip(
+        name=trip.name,
+        description=trip.description,
+        created_by_user_id=trip.created_by_user_id,
+        start_date=trip.start_date,
+        end_date=trip.end_date,
+        created_at=datetime.utcnow(),
+        updated_at=datetime.utcnow()
+    )
 
+    db.add(db_trip)
+    db.commit()
+    db.refresh(db_trip)
 
-@router.get("/future")
-async def get_future_trips(
-    db: Session = Depends(get_db), current_user: User = Depends(get_current_user)
-):
-    # The user from get_current_user is already a database model instance
-    # We need to get the actual UUID value from the model
-    user_id = current_user.user_id
-    if not isinstance(user_id, UUID):
-        user_id = UUID(str(user_id))
-    return get_user_trips(db, user_id)
+    return TripResponse.from_orm(db_trip)
