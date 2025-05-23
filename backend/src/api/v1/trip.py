@@ -6,6 +6,7 @@ from datetime import datetime
 from backend.src.database.config import get_db
 from backend.src.models.trip import Trip
 from backend.src.schemas.trip import TripCreate, TripResponse
+from backend.src.database.models import User  # Import the User model
 
 router = APIRouter()
 
