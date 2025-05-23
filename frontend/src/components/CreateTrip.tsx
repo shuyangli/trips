@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Dayjs } from "dayjs";
 import { Button, DatePicker, Form, Input, message } from "antd";
 import { axiosInstance } from "../api/axiosInstance";
@@ -14,7 +13,7 @@ export const CreateTrip = () => {
   const handleSubmit = (e: CreateTripRequestField) => {
     const {tripName, destination, dateRange} = e;
     const [startDate, endDate] = dateRange ?? [];
-      axiosInstance.post("/trips", {
+      axiosInstance.post("/api/v1/trips", {
         name: tripName,
         description: destination,
         start_date: startDate?.toISOString(),

@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from dataclasses import dataclass
 import uuid
 from enum import StrEnum
 
@@ -10,6 +10,7 @@ from sqlalchemy import (
     JSON,
     Float,
     Enum as SQLEnum,
+    func,
 )
 from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP
 from sqlalchemy.orm import declarative_base, relationship
@@ -24,6 +25,7 @@ class UserStatus(StrEnum):
     DEACTIVATED = "deactivated"
 
 
+@dataclass
 class User(Base):
     __tablename__ = "users"
 
@@ -41,13 +43,15 @@ class User(Base):
         default=UserStatus.UNVERIFIED,
     )
     created_at = Column(
-        TIMESTAMP(timezone=True), nullable=False, default=datetime.now(timezone.utc)
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        default=func.now(),
     )
     updated_at = Column(
         TIMESTAMP(timezone=True),
         nullable=False,
-        default=datetime.now(timezone.utc),
-        onupdate=datetime.now(timezone.utc),
+        default=func.now(),
+        onupdate=func.now(),
     )
 
     # Relationships
@@ -57,6 +61,7 @@ class User(Base):
     itinerary_participants = relationship("ItineraryParticipant", back_populates="user")
 
 
+@dataclass
 class Trip(Base):
     __tablename__ = "trips"
 
@@ -68,14 +73,12 @@ class Trip(Base):
     )
     start_date = Column(DateTime(timezone=True), nullable=True)
     end_date = Column(DateTime(timezone=True), nullable=True)
-    created_at = Column(
-        TIMESTAMP(timezone=True), nullable=False, default=datetime.now(timezone.utc)
-    )
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False, default=func.now())
     updated_at = Column(
         TIMESTAMP(timezone=True),
         nullable=False,
-        default=datetime.now(timezone.utc),
-        onupdate=datetime.now(timezone.utc),
+        default=func.now(),
+        onupdate=func.now(),
     )
 
     # Relationships
@@ -93,6 +96,7 @@ class TripParticipantStatus(StrEnum):
     LEFT = "left"
 
 
+@dataclass
 class TripParticipant(Base):
     __tablename__ = "trip_participants"
 
@@ -103,14 +107,12 @@ class TripParticipant(Base):
         nullable=False,
         default=TripParticipantStatus.UNKNOWN,
     )
-    created_at = Column(
-        TIMESTAMP(timezone=True), nullable=False, default=datetime.now(timezone.utc)
-    )
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False, default=func.now())
     updated_at = Column(
         TIMESTAMP(timezone=True),
         nullable=False,
-        default=datetime.now(timezone.utc),
-        onupdate=datetime.now(timezone.utc),
+        default=func.now(),
+        onupdate=func.now(),
     )
 
     # Relationships
@@ -118,6 +120,7 @@ class TripParticipant(Base):
     user = relationship("User", back_populates="trip_participations")
 
 
+@dataclass
 class TripSegment(Base):
     __tablename__ = "trip_segments"
 
@@ -129,14 +132,12 @@ class TripSegment(Base):
     longitude = Column(Float, nullable=True)
     start_date = Column(DateTime(timezone=True), nullable=True)
     end_date = Column(DateTime(timezone=True), nullable=True)
-    created_at = Column(
-        TIMESTAMP(timezone=True), nullable=False, default=datetime.now(timezone.utc)
-    )
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False, default=func.now())
     updated_at = Column(
         TIMESTAMP(timezone=True),
         nullable=False,
-        default=datetime.now(timezone.utc),
-        onupdate=datetime.now(timezone.utc),
+        default=func.now(),
+        onupdate=func.now(),
     )
 
     # Relationships
@@ -152,6 +153,7 @@ class ItineraryItemType(StrEnum):
     ACTIVITY = "activity"
 
 
+@dataclass
 class ItineraryItem(Base):
     __tablename__ = "itinerary_items"
 
@@ -166,14 +168,12 @@ class ItineraryItem(Base):
     booking_url = Column(String, nullable=True)
     notes = Column(String, nullable=True)
     raw_details_json = Column(JSON, nullable=True)
-    created_at = Column(
-        TIMESTAMP(timezone=True), nullable=False, default=datetime.now(timezone.utc)
-    )
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False, default=func.now())
     updated_at = Column(
         TIMESTAMP(timezone=True),
         nullable=False,
-        default=datetime.now(timezone.utc),
-        onupdate=datetime.now(timezone.utc),
+        default=func.now(),
+        onupdate=func.now(),
     )
 
     # Relationships
@@ -190,6 +190,7 @@ class ItineraryParticipantStatus(StrEnum):
     LEFT = "left"
 
 
+@dataclass
 class ItineraryParticipant(Base):
     __tablename__ = "itinerary_participants"
 
@@ -204,14 +205,12 @@ class ItineraryParticipant(Base):
         nullable=False,
         default=ItineraryParticipantStatus.UNKNOWN,
     )
-    created_at = Column(
-        TIMESTAMP(timezone=True), nullable=False, default=datetime.now(timezone.utc)
-    )
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False, default=func.now())
     updated_at = Column(
         TIMESTAMP(timezone=True),
         nullable=False,
-        default=datetime.now(timezone.utc),
-        onupdate=datetime.now(timezone.utc),
+        default=func.now(),
+        onupdate=func.now(),
     )
 
     # Relationships
