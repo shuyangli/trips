@@ -33,15 +33,15 @@ export const CreateTrip = () => {
       <div className="w-full max-w-xl p-8 rounded-lg shadow-md bg-white">
         <h1 className="text-3xl font-bold mb-8">Create a new trip</h1>
         <Form layout="vertical" requiredMark={true} onFinish={handleSubmit} className="space-y-6">
-            <Form.Item<CreateTripRequestField> name="tripName" label="Trip name" required={true} validateTrigger={"onBlur"}>
+            <Form.Item<CreateTripRequestField> name="tripName" label="Trip name" rules={[{ required: true, message: 'Please input the trip name!' }]} validateTrigger={"onBlur"}>
                 <Input placeholder="e.g., Tokyo Trip 2025" />
             </Form.Item>
 
-            <Form.Item<CreateTripRequestField> name="destination" label="Destination" required={true} validateTrigger={"onBlur"}>
+            <Form.Item<CreateTripRequestField> name="destination" label="Destination" rules={[{ required: true, message: 'Please input the destination!' }]} validateTrigger={"onBlur"}>
                 <Input placeholder="e.g., Tokyo" />
             </Form.Item>
 
-            <Form.Item<CreateTripRequestField> name="dateRange" label="Dates" required={true}>
+            <Form.Item<CreateTripRequestField> name="dateRange" label="Dates" rules={[{ required: true, message: 'Please select the date range!' }]} validateTrigger={"onBlur"}>
                 <DatePicker.RangePicker className="w-full" />
             </Form.Item>
 
