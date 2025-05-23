@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Dayjs } from 'dayjs';
-import { Button, DatePicker, Form, Input } from 'antd';
+import { Button, DatePicker, Form, Input, message } from 'antd';
+import { axiosInstance } from '../api/axiosInstance';
 
 export const CreateTrip = () => {
   const [tripName, setTripName] = useState('');
@@ -17,10 +18,21 @@ export const CreateTrip = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement trip creation logic
-    alert('Trip created!');
+    try {
+      await axiosInstance.post('/trips', {
+        name: tripName,
+        description: destination,
+        start_date: startDate?.toISOString(),
+        end_date: endDate?.toISOString(),
+        created_by_user_id: 'user-id-here', // Replace with actual user ID logic
+      });
+      message.success('Trip created successfully!');
+    } catch (error) {
+      console.error(error);
+      message.error('Failed to create trip. Please try again.');
+    }
   };
 
   return (
@@ -40,7 +52,7 @@ export const CreateTrip = () => {
                 <DatePicker.RangePicker className="w-full" value={[startDate, endDate]} onChange={handleDateRangeChange} />
             </Form.Item>
 
-            <Button className="w-full" type="primary" htmlType="submit" onClick={handleSubmit}>Create trip</Button>
+            <Button className="w-full" type="primary" htmlType="submit">Create trip</Button>
           </Form>
       </div>
     </div>
