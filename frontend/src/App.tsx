@@ -1,19 +1,21 @@
-import './App.css';
+import "./App.css";
+import { CreateTrip } from "./components/CreateTrip";
+import { TopNav } from "./components/TopNav";
+import { AuthStatusContext } from "./contexts/AuthStatusContext";
+import { type AuthStatus, useAuthStatus } from "./hooks/useAuthStatus";
+import { ConfigProvider } from "antd";
 
-import FirebaseLogin from './components/FirebaseLogin';
-import { AuthStatusContext } from './contexts/AuthContext';
-import { type AuthStatus, useAuthStatus } from './hooks/useAuthStatus';
-
-function App() {
+export const App = () => {
   const authStatus: AuthStatus = useAuthStatus();
   return (
-    <div className="app-container">
-      <h1>Welcome to Trips</h1>
+    // TODO: figure out the correct locale to use for antd components..
+    <ConfigProvider locale={{ locale: navigator.language }}>
       <AuthStatusContext.Provider value={authStatus}>
-        <FirebaseLogin />
+          <div className="app-container flex flex-col h-screen w-screen justify-between items-center">
+            <TopNav />
+            <CreateTrip />
+          </div>
       </AuthStatusContext.Provider>
-    </div>
+    </ConfigProvider>
   );
-}
-
-export default App;
+};
