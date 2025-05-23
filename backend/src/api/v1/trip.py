@@ -1,17 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from datetime import datetime
 
 from src.database.config import get_db
-from src.schemas.trip import Trip
-from src.schemas.trip import TripCreate, TripResponse
+from src.schemas.trip import Trip, CreateTripRequest
 from src.database.models import User  # Import the User model
 
 router = APIRouter()
 
-
-@router.post("/trips", response_model=TripResponse)
-def create_trip(trip: TripCreate, db: Session = Depends(get_db)):
+@router.post("/trips", response_model=Trip)
+def create_trip(trip: CreateTripRequest, db: Session = Depends(get_db)):
     # Check if the user exists
     existing_user = (
         db.query(User).filter(User.user_id == trip.created_by_user_id).first()
@@ -26,12 +23,10 @@ def create_trip(trip: TripCreate, db: Session = Depends(get_db)):
         created_by_user_id=trip.created_by_user_id,
         start_date=trip.start_date,
         end_date=trip.end_date,
-        created_at=datetime.utcnow(),
-        updated_at=datetime.utcnow(),
     )
 
     db.add(db_trip)
     db.commit()
     db.refresh(db_trip)
 
-    return TripResponse.from_orm(db_trip)
+    return Trip.from_orm(db_trip)

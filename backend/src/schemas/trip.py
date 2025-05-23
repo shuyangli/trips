@@ -2,7 +2,6 @@ from datetime import datetime
 import uuid
 from pydantic import BaseModel, ConfigDict, Field
 
-
 class Trip(BaseModel):
     trip_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
 
@@ -20,7 +19,6 @@ class Trip(BaseModel):
 
     model_config = ConfigDict(from_attributes=True, extra="forbid")
 
-
 class TripBase(BaseModel):
     name: str
     description: str | None = None
@@ -28,10 +26,8 @@ class TripBase(BaseModel):
     start_date: datetime | None = None
     end_date: datetime | None = None
 
-
-class TripCreate(TripBase):
+class CreateTripRequest(TripBase):
     pass
-
 
 class TripResponse(TripBase):
     trip_id: str
