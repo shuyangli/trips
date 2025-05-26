@@ -14,6 +14,7 @@ class UserStatus(StrEnum):
 class User(BaseModel):
     user_id: uuid.UUID = Field(default_factory=lambda: uuid.uuid4())
     email: str
+    status: UserStatus = UserStatus.UNVERIFIED
 
     # Do we need this?
     password_hash: str

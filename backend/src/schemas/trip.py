@@ -1,6 +1,7 @@
 from datetime import datetime
 import uuid
-from pydantic import BaseModel, ConfigDict, Field
+from typing import Any
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class Trip(BaseModel):
@@ -20,12 +21,18 @@ class Trip(BaseModel):
 
     model_config = ConfigDict(from_attributes=True, extra="forbid")
 
+    @field_validator("trip_id", "created_by_user_id", mode="before")
+    @classmethod
+    def uuid_to_string(cls, v: Any) -> str:
+        if isinstance(v, uuid.UUID):
+            return str(v)
+        if not isinstance(v, str):
+            raise ValueError(f"Invalid value {v} for str-like field.")
+        return v
+
 
 class CreateTripRequest(BaseModel):
     name: str
     description: str | None = None
     start_date: datetime | None = None
     end_date: datetime | None = None
-
-    # Temporary: for hacking only
-    created_by_user_id: str

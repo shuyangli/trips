@@ -2,9 +2,9 @@ from datetime import datetime
 from typing import Optional
 from uuid import UUID
 from sqlalchemy.orm import Session
-from sqlalchemy import update
+from sqlalchemy import update, insert, select
 
-from src.database.models import User, UserStatus
+from src.database.models import users, UserStatus
 
 
 def create_user(
@@ -16,37 +16,54 @@ def create_user(
     profile_picture_url: Optional[str] = None,
     oauth_provider: Optional[str] = None,
     oauth_provider_user_id: Optional[str] = None,
-) -> User:
-    db_user = User(
-        email=email,
-        password_hash=password_hash,
-        given_name=given_name,
-        family_name=family_name,
-        profile_picture_url=profile_picture_url,
-        oauth_provider=oauth_provider,
-        oauth_provider_user_id=oauth_provider_user_id,
+) -> dict:
+    stmt = (
+        insert(users)
+        .values(
+            email=email,
+            password_hash=password_hash,
+            given_name=given_name,
+            family_name=family_name,
+            profile_picture_url=profile_picture_url,
+            oauth_provider=oauth_provider,
+            oauth_provider_user_id=oauth_provider_user_id,
+            # status=UserStatus.UNVERIFIED,
+        )
+        .returning(users)
     )
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    return db_user
+
+    try:
+        result = db.execute(stmt)
+        db.commit()
+        first_result = result.first()
+        return dict(first_result._mapping) if first_result else None
+    except Exception as e:
+        db.rollback()
+        raise e
 
 
-def get_user(db: Session, user_id: UUID) -> Optional[User]:
-    return db.query(User).filter(User.user_id == user_id).first()
+def get_user(db: Session, user_id: UUID) -> Optional[dict]:
+    stmt = select(users).where(users.c.user_id == user_id)
+    result = db.execute(stmt).first()
+    return dict(result._mapping) if result else None
 
 
-def get_user_by_email(db: Session, email: str) -> Optional[User]:
-    return db.query(User).filter(User.email == email).first()
+def get_user_by_email(db: Session, email: str) -> Optional[dict]:
+    stmt = select(users).where(users.c.email == email)
+    result = db.execute(stmt).first()
+    return dict(result._mapping) if result else None
 
 
 def update_user_status(
     db: Session, user_id: UUID, status: UserStatus
-) -> Optional[User]:
-    user = get_user(db, user_id)
-    if user:
-        stmt = update(User).where(User.user_id == user_id).values(status=status.value)
-        db.execute(stmt)
-        db.commit()
-        db.refresh(user)
-    return user
+) -> Optional[dict]:
+    stmt = (
+        update(users)
+        .where(users.c.user_id == user_id)
+        .values(status=status.value)
+        .returning(users)
+    )
+    result = db.execute(stmt)
+    db.commit()
+    row = result.first()
+    return dict(row._mapping) if row else None

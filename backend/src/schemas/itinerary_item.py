@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import StrEnum
 from typing import Any
 import uuid
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class ItineraryItemType(StrEnum):
@@ -108,3 +108,14 @@ class ItineraryItem(BaseModel):
     # Maybe keep track of price too?
 
     model_config = ConfigDict(from_attributes=True, extra="forbid")
+
+    @field_validator(
+        "itinerary_item_id", "trip_id", "created_by_user_id", mode="before"
+    )
+    @classmethod
+    def uuid_to_string(cls, v: Any) -> str:
+        if isinstance(v, uuid.UUID):
+            return str(v)
+        if not isinstance(v, str):
+            raise ValueError(f"Invalid value {v} for str-like field.")
+        return v

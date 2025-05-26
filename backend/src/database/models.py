@@ -1,21 +1,20 @@
-from dataclasses import dataclass
-import uuid
 from enum import StrEnum
-
 from sqlalchemy import (
     Column,
     String,
     DateTime,
     ForeignKey,
+    MetaData,
+    Table,
     JSON,
     Float,
     Enum as SQLEnum,
     func,
+    text,
 )
 from sqlalchemy.dialects.postgresql import UUID, TIMESTAMP
-from sqlalchemy.orm import declarative_base, relationship
 
-Base = declarative_base()
+metadata_obj = MetaData()
 
 
 class UserStatus(StrEnum):
@@ -25,123 +24,12 @@ class UserStatus(StrEnum):
     DEACTIVATED = "deactivated"
 
 
-@dataclass
-class User(Base):
-    __tablename__ = "users"
-
-    user_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    email = Column(String, unique=True, nullable=False)
-    password_hash = Column(String, nullable=False)
-    given_name = Column(String, nullable=False)
-    family_name = Column(String, nullable=False)
-    profile_picture_url = Column(String, nullable=True)
-    oauth_provider = Column(String, nullable=True)
-    oauth_provider_user_id = Column(String, nullable=True)
-    status = Column(
-        SQLEnum(UserStatus, create_type=False),
-        nullable=False,
-        default=UserStatus.UNVERIFIED,
-    )
-    created_at = Column(
-        TIMESTAMP(timezone=True),
-        nullable=False,
-        default=func.now(),
-    )
-    updated_at = Column(
-        TIMESTAMP(timezone=True),
-        nullable=False,
-        default=func.now(),
-        onupdate=func.now(),
-    )
-
-    # Relationships
-    trips = relationship("Trip", back_populates="creator")
-    trip_participations = relationship("TripParticipant", back_populates="user")
-    itinerary_items = relationship("ItineraryItem", back_populates="creator")
-    itinerary_participants = relationship("ItineraryParticipant", back_populates="user")
-
-
-@dataclass
-class Trip(Base):
-    __tablename__ = "trips"
-
-    trip_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    name = Column(String, nullable=False)
-    description = Column(String, nullable=True)
-    created_by_user_id = Column(
-        UUID(as_uuid=True), ForeignKey("users.user_id"), nullable=False
-    )
-    start_date = Column(DateTime(timezone=True), nullable=True)
-    end_date = Column(DateTime(timezone=True), nullable=True)
-    created_at = Column(TIMESTAMP(timezone=True), nullable=False, default=func.now())
-    updated_at = Column(
-        TIMESTAMP(timezone=True),
-        nullable=False,
-        default=func.now(),
-        onupdate=func.now(),
-    )
-
-    # Relationships
-    creator = relationship("User", back_populates="trips")
-    participants = relationship("TripParticipant", back_populates="trip")
-    segments = relationship("TripSegment", back_populates="trip")
-    itinerary_items = relationship("ItineraryItem", back_populates="trip")
-
-
-class TripParticipantStatus(StrEnum):
+class ParticipantStatus(StrEnum):
     UNKNOWN = "unknown"
     INVITED = "invited"
     JOINED = "joined"
     DECLINED = "declined"
     LEFT = "left"
-
-
-@dataclass
-class TripParticipant(Base):
-    __tablename__ = "trip_participants"
-
-    trip_id = Column(UUID(as_uuid=True), ForeignKey("trips.trip_id"), primary_key=True)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.user_id"), primary_key=True)
-    status = Column(
-        SQLEnum(TripParticipantStatus, create_type=False),
-        nullable=False,
-        default=TripParticipantStatus.UNKNOWN,
-    )
-    created_at = Column(TIMESTAMP(timezone=True), nullable=False, default=func.now())
-    updated_at = Column(
-        TIMESTAMP(timezone=True),
-        nullable=False,
-        default=func.now(),
-        onupdate=func.now(),
-    )
-
-    # Relationships
-    trip = relationship("Trip", back_populates="participants")
-    user = relationship("User", back_populates="trip_participations")
-
-
-@dataclass
-class TripSegment(Base):
-    __tablename__ = "trip_segments"
-
-    trip_segment_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    trip_id = Column(UUID(as_uuid=True), ForeignKey("trips.trip_id"), nullable=False)
-    location_name = Column(String, nullable=False)
-    description = Column(String, nullable=False)
-    latitude = Column(Float, nullable=True)
-    longitude = Column(Float, nullable=True)
-    start_date = Column(DateTime(timezone=True), nullable=True)
-    end_date = Column(DateTime(timezone=True), nullable=True)
-    created_at = Column(TIMESTAMP(timezone=True), nullable=False, default=func.now())
-    updated_at = Column(
-        TIMESTAMP(timezone=True),
-        nullable=False,
-        default=func.now(),
-        onupdate=func.now(),
-    )
-
-    # Relationships
-    trip = relationship("Trip", back_populates="segments")
 
 
 class ItineraryItemType(StrEnum):
@@ -153,66 +41,206 @@ class ItineraryItemType(StrEnum):
     ACTIVITY = "activity"
 
 
-@dataclass
-class ItineraryItem(Base):
-    __tablename__ = "itinerary_items"
+metadata = MetaData()
 
-    itinerary_item_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    trip_id = Column(UUID(as_uuid=True), ForeignKey("trips.trip_id"), nullable=True)
-    created_by_user_id = Column(
-        UUID(as_uuid=True), ForeignKey("users.user_id"), nullable=False
-    )
-    type = Column(SQLEnum(ItineraryItemType, create_type=False), nullable=False)
-    itinerary_datetime = Column(DateTime(timezone=True), nullable=True)
-    booking_reference = Column(String, nullable=True)
-    booking_url = Column(String, nullable=True)
-    notes = Column(String, nullable=True)
-    raw_details_json = Column(JSON, nullable=True)
-    created_at = Column(TIMESTAMP(timezone=True), nullable=False, default=func.now())
-    updated_at = Column(
+users = Table(
+    "users",
+    metadata_obj,
+    Column(
+        "user_id",
+        UUID(as_uuid=True),
+        primary_key=True,
+        server_default=text("gen_random_uuid()"),
+    ),
+    Column("email", String, unique=True, nullable=False),
+    Column("password_hash", String, nullable=False),
+    Column("given_name", String, nullable=False),
+    Column("family_name", String, nullable=False),
+    Column("profile_picture_url", String, nullable=True),
+    Column("oauth_provider", String, nullable=True),
+    Column("oauth_provider_user_id", String, nullable=True),
+    Column(
+        "status",
+        SQLEnum(UserStatus, create_type=False),
+        nullable=False,
+        server_default=text("'UNVERIFIED'"),
+    ),
+    Column(
+        "created_at",
         TIMESTAMP(timezone=True),
         nullable=False,
-        default=func.now(),
+        server_default=func.now(),
+    ),
+    Column(
+        "updated_at",
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
         onupdate=func.now(),
-    )
+    ),
+)
 
-    # Relationships
-    trip = relationship("Trip", back_populates="itinerary_items")
-    creator = relationship("User", back_populates="itinerary_items")
-    participants = relationship("ItineraryParticipant", back_populates="itinerary_item")
+trips = Table(
+    "trips",
+    metadata_obj,
+    Column(
+        "trip_id",
+        UUID(as_uuid=True),
+        primary_key=True,
+        server_default=text("gen_random_uuid()"),
+    ),
+    Column("name", String, nullable=False),
+    Column("description", String, nullable=True),
+    Column(
+        "created_by_user_id",
+        UUID(as_uuid=True),
+        ForeignKey("users.user_id"),
+        nullable=False,
+    ),
+    Column("start_date", DateTime(timezone=True), nullable=True),
+    Column("end_date", DateTime(timezone=True), nullable=True),
+    Column(
+        "created_at",
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    ),
+    Column(
+        "updated_at",
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    ),
+)
 
+trip_participants = Table(
+    "trip_participants",
+    metadata_obj,
+    Column(
+        "trip_id", UUID(as_uuid=True), ForeignKey("trips.trip_id"), primary_key=True
+    ),
+    Column(
+        "user_id", UUID(as_uuid=True), ForeignKey("users.user_id"), primary_key=True
+    ),
+    Column(
+        "status",
+        SQLEnum(ParticipantStatus, create_type=False),
+        nullable=False,
+        server_default=text("'UNKNOWN'"),
+    ),
+    Column(
+        "created_at",
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    ),
+    Column(
+        "updated_at",
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    ),
+)
 
-class ItineraryParticipantStatus(StrEnum):
-    UNKNOWN = "unknown"
-    INVITED = "invited"
-    JOINED = "joined"
-    DECLINED = "declined"
-    LEFT = "left"
+trip_segments = Table(
+    "trip_segments",
+    metadata_obj,
+    Column(
+        "trip_segment_id",
+        UUID(as_uuid=True),
+        primary_key=True,
+        server_default=text("gen_random_uuid()"),
+    ),
+    Column("trip_id", UUID(as_uuid=True), ForeignKey("trips.trip_id"), nullable=False),
+    Column("location_name", String, nullable=False),
+    Column("description", String, nullable=False),
+    Column("latitude", Float, nullable=True),
+    Column("longitude", Float, nullable=True),
+    Column("start_date", DateTime(timezone=True), nullable=True),
+    Column("end_date", DateTime(timezone=True), nullable=True),
+    Column(
+        "created_at",
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    ),
+    Column(
+        "updated_at",
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    ),
+)
 
+itinerary_items = Table(
+    "itinerary_items",
+    metadata_obj,
+    Column(
+        "itinerary_item_id",
+        UUID(as_uuid=True),
+        primary_key=True,
+        server_default=text("gen_random_uuid()"),
+    ),
+    Column("trip_id", UUID(as_uuid=True), ForeignKey("trips.trip_id"), nullable=True),
+    Column(
+        "created_by_user_id",
+        UUID(as_uuid=True),
+        ForeignKey("users.user_id"),
+        nullable=False,
+    ),
+    Column("type", SQLEnum(ItineraryItemType, create_type=False), nullable=False),
+    Column("itinerary_datetime", DateTime(timezone=True), nullable=True),
+    Column("booking_reference", String, nullable=True),
+    Column("booking_url", String, nullable=True),
+    Column("notes", String, nullable=True),
+    Column("raw_details_json", JSON, nullable=True),
+    Column(
+        "created_at",
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+    ),
+    Column(
+        "updated_at",
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
+        onupdate=func.now(),
+    ),
+)
 
-@dataclass
-class ItineraryParticipant(Base):
-    __tablename__ = "itinerary_participants"
-
-    itinerary_item_id = Column(
+itinerary_participants = Table(
+    "itinerary_participants",
+    metadata_obj,
+    Column(
+        "itinerary_item_id",
         UUID(as_uuid=True),
         ForeignKey("itinerary_items.itinerary_item_id"),
         primary_key=True,
-    )
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.user_id"), primary_key=True)
-    status = Column(
-        SQLEnum(ItineraryParticipantStatus, create_type=False),
+    ),
+    Column(
+        "user_id", UUID(as_uuid=True), ForeignKey("users.user_id"), primary_key=True
+    ),
+    Column(
+        "status",
+        SQLEnum(ParticipantStatus, create_type=False),
         nullable=False,
-        default=ItineraryParticipantStatus.UNKNOWN,
-    )
-    created_at = Column(TIMESTAMP(timezone=True), nullable=False, default=func.now())
-    updated_at = Column(
+        server_default=text("'UNKNOWN'"),
+    ),
+    Column(
+        "created_at",
         TIMESTAMP(timezone=True),
         nullable=False,
-        default=func.now(),
+        server_default=func.now(),
+    ),
+    Column(
+        "updated_at",
+        TIMESTAMP(timezone=True),
+        nullable=False,
+        server_default=func.now(),
         onupdate=func.now(),
-    )
-
-    # Relationships
-    itinerary_item = relationship("ItineraryItem", back_populates="participants")
-    user = relationship("User", back_populates="itinerary_participants")
+    ),
+)

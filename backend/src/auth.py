@@ -4,10 +4,10 @@ from sqlalchemy.orm import Session
 from firebase_admin import auth
 import logging
 
+from src.schemas.user import User
 from src.firebase import get_firebase_app
 from src.database.config import get_db
-from src.database.crud import get_user_by_email
-from src.database.models import User
+from src.database.crud.user import get_user_by_email
 
 logger = logging.getLogger(__name__)
 
@@ -40,4 +40,4 @@ async def get_current_user(
     if user is None:
         logger.error(f"User authenticated but not found: {email}")
         raise credentials_exception
-    return user
+    return User.model_validate(user)

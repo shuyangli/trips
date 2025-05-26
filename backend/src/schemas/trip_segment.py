@@ -1,7 +1,8 @@
 from datetime import datetime
+from typing import Any
 import uuid
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class TripSegment(BaseModel):
@@ -23,3 +24,12 @@ class TripSegment(BaseModel):
     updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True, extra="forbid")
+
+    @field_validator("trip_id", mode="before")
+    @classmethod
+    def uuid_to_string(cls, v: Any) -> str:
+        if isinstance(v, uuid.UUID):
+            return str(v)
+        if not isinstance(v, str):
+            raise ValueError(f"Invalid value {v} for str-like field.")
+        return v

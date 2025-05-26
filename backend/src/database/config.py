@@ -2,7 +2,7 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from src.database.models import Base
+from src.database.models import metadata_obj
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
@@ -26,4 +26,4 @@ def get_db():
 
 def init_db():
     """Initialize the database by creating all tables"""
-    Base.metadata.create_all(bind=engine)
+    metadata_obj.create_all(bind=engine)

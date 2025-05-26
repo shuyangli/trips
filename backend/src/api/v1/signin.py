@@ -6,7 +6,7 @@ from firebase_admin import auth
 from sqlalchemy.orm import Session
 
 from src.database.config import get_db
-from src.database import crud
+from src.database.crud.user import get_user_by_email, create_user
 from src.auth import OAUTH2_SCHEME
 from src.firebase import get_firebase_app
 
@@ -46,11 +46,11 @@ async def authenticate(
     profile_picture_url = idinfo.get("picture", "")
     google_id = idinfo["sub"]
 
-    user = crud.get_user_by_email(db, email)
+    user = get_user_by_email(db, email)
 
     if not user:
         try:
-            user = crud.create_user(
+            user = create_user(
                 db=db,
                 email=email,
                 password_hash="",

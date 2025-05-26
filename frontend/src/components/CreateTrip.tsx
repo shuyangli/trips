@@ -18,7 +18,6 @@ export const CreateTrip = () => {
         description: destination,
         start_date: startDate?.toISOString(),
         end_date: endDate?.toISOString(),
-        created_by_user_id: "0579c7bf-76e6-4783-b889-c6657157c09c", // Replace with actual user ID logic
       }).then(() => {
         message.success("Trip created successfully!");
       }).catch((error) => {
