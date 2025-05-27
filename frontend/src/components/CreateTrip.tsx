@@ -9,7 +9,6 @@ interface CreateTripRequestField {
 }
 
 export const CreateTrip = () => {
-
   const handleSubmit = (e: CreateTripRequestField) => {
     const {tripName, destination, dateRange} = e;
     const [startDate, endDate] = dateRange ?? [];
