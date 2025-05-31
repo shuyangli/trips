@@ -1,10 +1,8 @@
 import { ConfigProvider } from "antd";
-import { useState } from "react";
 import { BrowserRouter, Route, Routes } from "react-router";
 
 import "./App.css";
 import { CreateTrip } from "./components/CreateTrip";
-import { TopNav } from "./components/TopNav";
 import { TripList } from "./components/TripList";
 import { AuthStatusContext } from "./contexts/AuthStatusContext";
 import { type AuthStatus, useAuthStatus } from "./hooks/useAuthStatus";

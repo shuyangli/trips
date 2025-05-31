@@ -8,9 +8,12 @@ export interface AuthStatus {
   loading: boolean;
 }
 
-function maybeCreateUserInBackend() {
-  // Not sure if this is still needed if we're injecting the token on the header.
-  axiosInstance.post("/signin");
+async function maybeCreateUserInBackend() {
+  try {
+    await axiosInstance.post("/signin");
+  } catch (error) {
+    console.error("Failed to create user in backend:", error);
+  }
 }
 
 export const useAuthStatus = () => {
