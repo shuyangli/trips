@@ -3,7 +3,7 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 from sqlalchemy import insert, select, and_, or_, update
 
-from src.database.models import trips, trip_participants
+from src.database.models import trips, trip_participants, ParticipantStatus
 
 
 def create_trip(
@@ -66,23 +66,23 @@ def get_trips_for_user(
             trips.c.created_by_user_id == user_id,
             trips.c.trip_id.in_(
                 select(trip_participants.c.trip_id).where(
-                    trip_participants.c.user_id == user_id
+                    and_(
+                        trip_participants.c.user_id == user_id,
+                        trip_participants.c.status == ParticipantStatus.JOINED,
+                    )
                 )
-            )
+            ),
         )
     )
-    
+
     if future_only:
         now = datetime.utcnow()
         stmt = stmt.where(
-            and_(
-                trips.c.start_date.is_not(None),
-                trips.c.start_date >= now
-            )
+            and_(trips.c.start_date.is_not(None), trips.c.start_date >= now)
         )
-    
+
     stmt = stmt.order_by(trips.c.start_date.asc())
-    
+
     result = db.execute(stmt)
     return [dict(row._mapping) for row in result.fetchall()]
 
@@ -103,14 +103,17 @@ def user_has_trip_access(
                     select(trip_participants.c.trip_id).where(
                         and_(
                             trip_participants.c.trip_id == trip_id,
-                            trip_participants.c.user_id == user_id
+                            trip_participants.c.user_id == user_id,
+                            trip_participants.c.status.in_(
+                                [ParticipantStatus.INVITED, ParticipantStatus.JOINED]
+                            ),
                         )
                     )
-                )
-            )
+                ),
+            ),
         )
     )
-    
+
     result = db.execute(stmt)
     return result.first() is not None
 
@@ -124,7 +127,7 @@ def get_trip_by_id(
     # First check if user has access
     if not user_has_trip_access(db, trip_id, user_id):
         return None
-    
+
     # If user has access, get the trip details
     stmt = select(
         trips.c.trip_id,
@@ -136,7 +139,7 @@ def get_trip_by_id(
         trips.c.created_at,
         trips.c.updated_at,
     ).where(trips.c.trip_id == trip_id)
-    
+
     result = db.execute(stmt)
     row = result.first()
     if not row:
@@ -157,7 +160,7 @@ def update_trip(
     # First check if user has access
     if not user_has_trip_access(db, trip_id, user_id):
         return None
-    
+
     # Build update values (only include non-None values)
     update_values = {"updated_at": datetime.utcnow()}
     if name is not None:
@@ -168,7 +171,7 @@ def update_trip(
         update_values["start_date"] = start_date
     if end_date is not None:
         update_values["end_date"] = end_date
-    
+
     # Update the trip
     stmt_update = (
         update(trips)
@@ -185,7 +188,7 @@ def update_trip(
             trips.c.updated_at,
         )
     )
-    
+
     result = db.execute(stmt_update)
     db.commit()
     updated_row = result.first()

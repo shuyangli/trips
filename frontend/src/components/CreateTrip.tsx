@@ -21,20 +21,35 @@ export const CreateTrip = () => {
     
     setLoading(true);
     try {
-      await axiosInstance.post("/api/v1/trips", {
+      const tripResponse = await axiosInstance.post("/api/v1/trips", {
         name: tripName,
         description: destination,
         start_date: startDate?.toISOString(),
         end_date: endDate?.toISOString(),
       });
 
-      // TODO: Add participant invitations here when backend is ready
-      if (participants && participants.length > 0) {
-        console.log("Participants to invite:", participants);
-        // Future: Call API to invite participants
-      }
+      const createdTrip = tripResponse.data;
 
-      message.success("Trip created successfully!");
+      // Send invitations to participants
+      if (participants && participants.length > 0) {
+        const invitationPromises = participants.map(email => 
+          axiosInstance.post(`/api/v1/trips/${createdTrip.trip_id}/invite`, {
+            email: email.trim()
+          }).catch(error => {
+            console.error(`Failed to invite ${email}:`, error);
+            message.warning(`Failed to invite ${email}`);
+          })
+        );
+
+        await Promise.allSettled(invitationPromises);
+        
+        const successfulInvites = participants.length;
+        if (successfulInvites > 0) {
+          message.success(`Trip created! Invitations sent to ${successfulInvites} participant${successfulInvites > 1 ? 's' : ''}.`);
+        }
+      } else {
+        message.success("Trip created successfully!");
+      }
       navigate("/"); // Navigate back to trip list
     } catch (error) {
       console.error(error);

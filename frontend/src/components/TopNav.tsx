@@ -1,9 +1,10 @@
 import { NavLink } from "react-router";
 import { FirebaseLogin } from "./FirebaseLogin";
+import { InvitationPopover } from "./InvitationPopover";
 
 export const TopNav = () => {
   return (
-    <nav className="fixed top-0 left-0 right-0 z-10 w-full bg-white shadow flex items-center justify-between px-8 py-3"> {/* */}
+    <nav className="fixed top-0 left-0 right-0 z-10 w-full bg-white shadow flex items-center justify-between px-8 py-3">
       <div>
         <NavLink
           to="/"
@@ -14,7 +15,10 @@ export const TopNav = () => {
           Trips
         </NavLink>
       </div>
-      <FirebaseLogin /> {/* */}
+      <div className="flex items-center space-x-4">
+        <InvitationPopover />
+        <FirebaseLogin />
+      </div>
     </nav>
   );
 };

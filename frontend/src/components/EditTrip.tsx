@@ -60,11 +60,12 @@ export const EditTrip = () => {
   const handleSubmit = async (data: TripFormData) => {
     if (!tripId) return;
     
-    const { tripName, destination, dateRange } = data;
+    const { tripName, destination, dateRange, participants } = data;
     const [startDate, endDate] = dateRange ?? [];
     
     setSubmitting(true);
     try {
+      // Update trip details
       await axiosInstance.put(`/api/v1/trips/${tripId}`, {
         name: tripName,
         description: destination,
@@ -72,7 +73,29 @@ export const EditTrip = () => {
         end_date: endDate?.toISOString(),
       });
 
-      message.success("Trip updated successfully!");
+      // Send invitations to new participants
+      if (participants && participants.length > 0) {
+        const invitationPromises = participants.map(email => 
+          axiosInstance.post(`/api/v1/trips/${tripId}/invite`, {
+            email: email.trim()
+          }).catch(error => {
+            console.error(`Failed to invite ${email}:`, error);
+            message.warning(`Failed to invite ${email}`);
+          })
+        );
+
+        await Promise.allSettled(invitationPromises);
+        
+        const successfulInvites = participants.length;
+        if (successfulInvites > 0) {
+          message.success(`Trip updated! Invitations sent to ${successfulInvites} additional participant${successfulInvites > 1 ? 's' : ''}.`);
+        } else {
+          message.success("Trip updated successfully!");
+        }
+      } else {
+        message.success("Trip updated successfully!");
+      }
+
       navigate(`/trip/${tripId}`);
     } catch (error) {
       console.error(error);

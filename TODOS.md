@@ -1,0 +1,4 @@
+- [ ] When the user accept a trip invitation, the trip list should auto refresh.
+- [ ] The Create/Edit trip UI should be full-width and look closer to the rest of the site.
+- [ ] There should be a manual itinerary editing functionality.
+- [ ] There should be an automatic itinerary entry functionality (through Chrome extensions for now, but it should also support email forwarding). Email forwarding should create custom recipient emails for each user, since users may use multiple emails for different external services.

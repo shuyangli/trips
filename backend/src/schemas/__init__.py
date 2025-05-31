@@ -4,7 +4,7 @@ API types for backend data models.
 
 from .user import User, UserStatus
 from .trip import Trip
-from .trip_participant import TripParticipant, TripParticipantStatus
+from .trip_participant import TripParticipant, ParticipantStatus
 from .trip_segment import TripSegment
 from .itinerary_item import ItineraryItem, ItineraryItemType
 from .itinerary_participant import ItineraryParticipant, ItineraryParticipantStatus
@@ -16,7 +16,7 @@ __all__ = [
     "ItineraryParticipantStatus",
     "Trip",
     "TripParticipant",
-    "TripParticipantStatus",
+    "ParticipantStatus",
     "TripSegment",
     "User",
     "UserStatus",

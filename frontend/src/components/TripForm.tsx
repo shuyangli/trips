@@ -91,20 +91,19 @@ export const TripForm = ({ mode, initialValues, onSubmit, loading }: TripFormPro
           <DatePicker.RangePicker className="w-full" />
         </Form.Item>
 
-        {mode === "create" && (
-          <Form.Item<TripFormData> 
-            name="participants" 
-            label="Invite participants (optional)"
-          >
-            <Select
-              mode="tags"
-              placeholder="Enter email addresses"
-              style={{ width: '100%' }}
-              tokenSeparators={[',']}
-              notFoundContent={null}
-            />
-          </Form.Item>
-        )}
+        <Form.Item<TripFormData> 
+          name="participants" 
+          label={mode === "create" ? "Invite participants (optional)" : "Invite additional participants (optional)"}
+        >
+          <Select
+            mode="tags"
+            placeholder="Enter email addresses (press Enter or comma to add)"
+            style={{ width: '100%' }}
+            tokenSeparators={[',', ' ']}
+            notFoundContent={null}
+            filterOption={false}
+          />
+        </Form.Item>
 
         <Button 
           className="w-full" 
