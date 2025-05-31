@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router";
 
 import "./App.css";
 import { CreateTrip } from "./components/CreateTrip";
+import { EditTrip } from "./components/EditTrip";
 import { TripList } from "./components/TripList";
 import { AuthStatusContext } from "./contexts/AuthStatusContext";
 import { type AuthStatus, useAuthStatus } from "./hooks/useAuthStatus";
@@ -22,6 +23,7 @@ export const App = () => {
               <Route index element={<TripList />} />
               <Route path="create" element={<CreateTrip />} />
               <Route path="trip/:tripId" element={<TripDetailPage />} />
+              <Route path="trip/:tripId/edit" element={<EditTrip />} />
               {/* <Route path="trip/:tripId/timeline" element={<TripTimelinePage />} /> */}
             </Route>
           </Routes>

@@ -36,3 +36,28 @@ class CreateTripRequest(BaseModel):
     description: str | None = None
     start_date: datetime | None = None
     end_date: datetime | None = None
+
+
+class TripDetails(BaseModel):
+    trip_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    name: str
+    description: str | None = None
+    created_by_user_id: str
+    start_date: datetime | None = None
+    end_date: datetime | None = None
+    created_at: datetime
+    updated_at: datetime
+    
+    # Include itinerary items
+    itinerary_items: list[dict] = []
+
+    model_config = ConfigDict(from_attributes=True, extra="forbid")
+
+    @field_validator("trip_id", "created_by_user_id", mode="before")
+    @classmethod
+    def uuid_to_string(cls, v: Any) -> str:
+        if isinstance(v, uuid.UUID):
+            return str(v)
+        if not isinstance(v, str):
+            raise ValueError(f"Invalid value {v} for str-like field.")
+        return v

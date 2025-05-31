@@ -1,5 +1,6 @@
 import { Card, Tag } from "antd";
 import { CalendarOutlined, EnvironmentOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router";
 import dayjs from "dayjs";
 
 interface Trip {
@@ -17,6 +18,12 @@ interface TripCardProps {
 }
 
 export const TripCard = ({ trip }: TripCardProps) => {
+  const navigate = useNavigate();
+  
+  const handleCardClick = () => {
+    navigate(`/trip/${trip.trip_id}`);
+  };
+
   const formatDate = (dateString?: string) => {
     if (!dateString) return "TBD";
     return dayjs(dateString).format("MMM D, YYYY");
@@ -48,6 +55,7 @@ export const TripCard = ({ trip }: TripCardProps) => {
       className="w-full mb-4 hover:shadow-xl transition-all duration-200 cursor-pointer border-0 shadow-md"
       hoverable
       style={{ borderRadius: '12px' }}
+      onClick={handleCardClick}
     >
       <div className="flex flex-col space-y-3">
         <div className="flex justify-between items-start">

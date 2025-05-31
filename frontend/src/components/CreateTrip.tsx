@@ -1,50 +1,57 @@
-import { Dayjs } from "dayjs";
-import { Button, DatePicker, Form, Input, message } from "antd";
+import { useState } from "react";
+import { useNavigate } from "react-router";
+import { message } from "antd";
 import { axiosInstance } from "../api/axiosInstance";
+import { TripForm } from "./TripForm";
 
-interface CreateTripRequestField {
-    tripName?: string;
-    destination?: string;
-    dateRange?: [Dayjs, Dayjs];
+interface TripFormData {
+  tripName?: string;
+  destination?: string;
+  dateRange?: [import("dayjs").Dayjs, import("dayjs").Dayjs];
+  participants?: string[];
 }
 
 export const CreateTrip = () => {
-  const handleSubmit = (e: CreateTripRequestField) => {
-    const {tripName, destination, dateRange} = e;
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (data: TripFormData) => {
+    const { tripName, destination, dateRange, participants } = data;
     const [startDate, endDate] = dateRange ?? [];
-      axiosInstance.post("/api/v1/trips", {
+    
+    setLoading(true);
+    try {
+      await axiosInstance.post("/api/v1/trips", {
         name: tripName,
         description: destination,
         start_date: startDate?.toISOString(),
         end_date: endDate?.toISOString(),
-      }).then(() => {
-        message.success("Trip created successfully!");
-      }).catch((error) => {
-        console.error(error);
-        message.error("Failed to create trip. Please try again.");
-      })
+      });
+
+      // TODO: Add participant invitations here when backend is ready
+      if (participants && participants.length > 0) {
+        console.log("Participants to invite:", participants);
+        // Future: Call API to invite participants
+      }
+
+      message.success("Trip created successfully!");
+      navigate("/"); // Navigate back to trip list
+    } catch (error) {
+      console.error(error);
+      message.error("Failed to create trip. Please try again.");
+      throw error; // Re-throw to prevent form reset
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-white">
-      <div className="w-full max-w-xl p-8 rounded-lg shadow-md bg-white">
-        <h1 className="text-3xl font-bold mb-8">Create a new trip</h1>
-        <Form layout="vertical" requiredMark={true} onFinish={handleSubmit} className="space-y-6">
-            <Form.Item<CreateTripRequestField> name="tripName" label="Trip name" rules={[{ required: true, message: 'Please input the trip name!' }]} validateTrigger={"onBlur"}>
-                <Input placeholder="e.g., Tokyo Trip 2025" />
-            </Form.Item>
-
-            <Form.Item<CreateTripRequestField> name="destination" label="Destination" rules={[{ required: true, message: 'Please input the destination!' }]} validateTrigger={"onBlur"}>
-                <Input placeholder="e.g., Tokyo" />
-            </Form.Item>
-
-            <Form.Item<CreateTripRequestField> name="dateRange" label="Dates" rules={[{ required: true, message: 'Please select the date range!' }]} validateTrigger={"onBlur"}>
-                <DatePicker.RangePicker className="w-full" />
-            </Form.Item>
-
-            <Button className="w-full" type="primary" htmlType="submit">Create trip</Button>
-          </Form>
-      </div>
+      <TripForm 
+        mode="create" 
+        onSubmit={handleSubmit}
+        loading={loading}
+      />
     </div>
   );
 };

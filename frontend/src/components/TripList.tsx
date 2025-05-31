@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
-import { message, Spin } from "antd";
-import { Link } from "react-router";
+import { message, Spin, Button } from "antd";
+import { Link, useNavigate } from "react-router";
+import { PlusOutlined } from "@ant-design/icons";
 import { axiosInstance } from "../api/axiosInstance";
 import { TripCard } from "./TripCard";
 import { AuthStatusContext } from "../contexts/AuthStatusContext";
@@ -19,6 +20,7 @@ export const TripList = () => {
   const [trips, setTrips] = useState<Trip[]>([]);
   const [loading, setLoading] = useState(true);
   const authStatus = useContext(AuthStatusContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchTrips = async () => {
@@ -70,8 +72,20 @@ export const TripList = () => {
   return (
     <div className="w-full max-w-5xl mx-auto p-6">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">Your Upcoming Trips</h1>
-        <p className="text-gray-600 text-lg">Plan and manage your future adventures</p>
+        <div className="flex justify-between items-center mb-4">
+          <div>
+            <h1 className="text-4xl font-bold text-gray-900 mb-2">Your Upcoming Trips</h1>
+            <p className="text-gray-600 text-lg">Plan and manage your future adventures</p>
+          </div>
+          <Button 
+            type="primary" 
+            size="large"
+            icon={<PlusOutlined />}
+            onClick={() => navigate("/create")}
+          >
+            Create Trip
+          </Button>
+        </div>
       </div>
       
       {trips.length === 0 ? (

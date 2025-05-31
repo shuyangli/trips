@@ -13,23 +13,6 @@ export const TopNav = () => {
         >
           Trips
         </NavLink>
-        <NavLink
-          to="/create"
-          className={({ isActive }) =>
-            `text-xl font-bold tracking-tight mr-4 ${isActive ? "text-blue-600" : "text-gray-700"}`
-          }
-        >
-          Create Trip
-        </NavLink>
-
-        <NavLink
-          to="/trip/paris"
-          className={({ isActive }) =>
-            `text-xl font-bold tracking-tight mr-4 ${isActive ? "text-blue-600" : "text-gray-600"}`
-          }
-        >
-          Trip Detail
-        </NavLink>
       </div>
       <FirebaseLogin /> {/* */}
     </nav>
