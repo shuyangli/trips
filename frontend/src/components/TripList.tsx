@@ -5,6 +5,7 @@ import { PlusOutlined } from "@ant-design/icons";
 import { axiosInstance } from "../api/axiosInstance";
 import { TripCard } from "./TripCard";
 import { AuthStatusContext } from "../contexts/AuthStatusContext";
+import { ErrorView } from "./ErrorView";
 
 interface Trip {
   trip_id: string;
@@ -57,16 +58,11 @@ export const TripList = () => {
 
   if (!authStatus.user) {
     return (
-      <div className="w-full max-w-5xl mx-auto p-6">
-        <div className="text-center py-24 bg-white rounded-2xl shadow-sm border border-gray-100">
-          <div className="max-w-md mx-auto">
-            <div className="text-6xl mb-6">🔐</div>
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">Sign in required</h3>
-            <p className="text-gray-500">Please sign in to view your trips and start planning your adventures.</p>
-          </div>
-        </div>
-      </div>
-    );
+      <ErrorView
+        icon="🔐"
+        title="Sign in required"
+        details="Please sign in to view your trips and start planning your adventures."
+       />);
   }
 
   return (
@@ -77,8 +73,8 @@ export const TripList = () => {
             <h1 className="text-4xl font-bold text-gray-900 mb-2">Your Upcoming Trips</h1>
             <p className="text-gray-600 text-lg">Plan and manage your future adventures</p>
           </div>
-          <Button 
-            type="primary" 
+          <Button
+            type="primary"
             size="large"
             icon={<PlusOutlined />}
             onClick={() => navigate("/create")}
@@ -87,14 +83,14 @@ export const TripList = () => {
           </Button>
         </div>
       </div>
-      
+
       {trips.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-2xl shadow-sm border border-gray-100">
           <div className="max-w-md mx-auto">
             <div className="text-6xl mb-6">✈️</div>
             <h3 className="text-xl font-semibold text-gray-700 mb-2">No upcoming trips yet</h3>
             <p className="text-gray-500 mb-6">Ready to plan your next adventure?</p>
-            <Link 
+            <Link
               to="/create"
               className="inline-block bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors no-underline"
             >

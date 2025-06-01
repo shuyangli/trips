@@ -5,6 +5,7 @@ import { ArrowLeftOutlined, CalendarOutlined, EnvironmentOutlined, ClockCircleOu
 import dayjs from "dayjs";
 import { axiosInstance } from "../api/axiosInstance";
 import { AuthStatusContext } from "../contexts/AuthStatusContext";
+import { ErrorView } from "./ErrorView";
 
 interface TripDetails {
   trip_id: string;
@@ -41,7 +42,7 @@ export const TripDetailPage = () => {
   useEffect(() => {
     const fetchTripDetails = async () => {
       if (!tripId) return;
-      
+
       try {
         const response = await axiosInstance.get<TripDetails>(`/api/v1/trips/${tripId}`);
         setTrip(response.data);
@@ -116,32 +117,23 @@ export const TripDetailPage = () => {
 
   if (!authStatus.user) {
     return (
-      <div className="w-full max-w-6xl mx-auto p-6">
-        <div className="text-center py-24 bg-white rounded-2xl shadow-sm border border-gray-100">
-          <div className="max-w-md mx-auto">
-            <div className="text-6xl mb-6">🔐</div>
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">Sign in required</h3>
-            <p className="text-gray-500">Please sign in to view trip details.</p>
-          </div>
-        </div>
-      </div>
-    );
+      <ErrorView
+        icon="🔐"
+        title="Sign in required"
+        details="Please sign in to view trip details."
+       />);
   }
 
   if (!trip) {
     return (
-      <div className="w-full max-w-6xl mx-auto p-6">
-        <div className="text-center py-24 bg-white rounded-2xl shadow-sm border border-gray-100">
-          <div className="max-w-md mx-auto">
-            <div className="text-6xl mb-6">❌</div>
-            <h3 className="text-xl font-semibold text-gray-700 mb-2">Trip not found</h3>
-            <p className="text-gray-500">This trip doesn't exist or you don't have access to it.</p>
-            <Button type="primary" onClick={() => navigate("/")} className="mt-4">
-              Back to Trips
-            </Button>
-          </div>
-        </div>
-      </div>
+      <ErrorView
+        icon="❌"
+        title="Trip not found."
+        details="This trip doesn't exist or you don't have access to it.">
+          <Button type="primary" onClick={() => navigate("/")} className="mt-4">
+            Back to Trips
+          </Button>
+      </ErrorView>
     );
   }
 
@@ -149,31 +141,31 @@ export const TripDetailPage = () => {
     <div className="w-full max-w-6xl mx-auto p-6">
       {/* Header */}
       <div className="mb-8">
-        <Button 
-          icon={<ArrowLeftOutlined />} 
+        <Button
+          icon={<ArrowLeftOutlined />}
           onClick={() => navigate("/")}
           className="mb-4"
         >
           Back to Trips
         </Button>
-        
+
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
           <div className="flex justify-between items-start mb-4">
             <h1 className="text-4xl font-bold text-gray-900">{trip.name}</h1>
-            <Button 
-              type="primary" 
+            <Button
+              type="primary"
               icon={<EditOutlined />}
               onClick={() => navigate(`/trip/${trip.trip_id}/edit`)}
             >
               Edit Trip
             </Button>
           </div>
-          
+
           <div className="flex items-center text-gray-600 mb-4">
             <CalendarOutlined className="mr-2 text-blue-500" />
             <span className="font-medium text-lg">{formatDateRange()}</span>
           </div>
-          
+
           {trip.description && (
             <div className="flex items-start text-gray-600 mb-4">
               <EnvironmentOutlined className="mr-2 mt-1 text-green-500 flex-shrink-0" />
@@ -186,7 +178,7 @@ export const TripDetailPage = () => {
       {/* Itinerary Section */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
         <h2 className="text-2xl font-bold text-gray-900 mb-6">Itinerary</h2>
-        
+
         {trip.itinerary_items.length === 0 ? (
           <Empty
             image={Empty.PRESENTED_IMAGE_SIMPLE}
@@ -219,21 +211,21 @@ export const TripDetailPage = () => {
                           </div>
                         )}
                       </div>
-                      
+
                       {item.notes && (
                         <p className="text-gray-700 mb-2">{item.notes}</p>
                       )}
-                      
+
                       {item.booking_reference && (
                         <p className="text-sm text-gray-500">
                           <strong>Reference:</strong> {item.booking_reference}
                         </p>
                       )}
-                      
+
                       {item.booking_url && (
-                        <a 
-                          href={item.booking_url} 
-                          target="_blank" 
+                        <a
+                          href={item.booking_url}
+                          target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-500 hover:text-blue-700 text-sm"
                         >
