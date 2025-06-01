@@ -1,15 +1,7 @@
-import { useState } from "react";
 import { useNavigate } from "react-router";
 import { message } from "antd";
 import { axiosInstance } from "../api/axiosInstance";
-import { TripForm } from "./TripForm";
-
-interface TripFormData {
-  tripName?: string;
-  destination?: string;
-  dateRange?: [import("dayjs").Dayjs, import("dayjs").Dayjs];
-  participants?: string[];
-}
+import { TripForm, type TripFormData } from "./TripForm";
 
 export const CreateTrip = () => {
   const navigate = useNavigate();
@@ -56,10 +48,5 @@ export const CreateTrip = () => {
     }
   };
 
-  return (
-    <TripForm
-      mode="create"
-      onSubmit={handleSubmit}
-    />
-  );
+  return <TripForm onSubmit={handleSubmit} />;
 };

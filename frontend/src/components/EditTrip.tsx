@@ -1,17 +1,10 @@
 import { useState, useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router";
-import { message, Spin } from "antd";
+import { message } from "antd";
 import { axiosInstance } from "../api/axiosInstance";
-import { TripForm } from "./TripForm";
+import { TripForm, type TripFormData } from "./TripForm";
 import { AuthStatusContext } from "../contexts/AuthStatusContext";
 import { LoadingView } from "./LoadingView";
-
-interface TripFormData {
-  tripName?: string;
-  destination?: string;
-  dateRange?: [import("dayjs").Dayjs, import("dayjs").Dayjs];
-  participants?: string[];
-}
 
 interface TripDetails {
   trip_id: string;
@@ -124,10 +117,6 @@ export const EditTrip = () => {
   }
 
   return (
-    <TripForm
-      mode="edit"
-      initialValues={trip}
-      onSubmit={handleSubmit}
-    />
+    <TripForm initialValues={trip} onSubmit={handleSubmit} />
   );
 };

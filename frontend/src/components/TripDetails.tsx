@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router";
-import { Card, Spin, message, Tag, Button, Empty } from "antd";
+import { Card, message, Tag, Button, Empty } from "antd";
 import { ArrowLeftOutlined, CalendarOutlined, EnvironmentOutlined, ClockCircleOutlined, EditOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { axiosInstance } from "../api/axiosInstance";

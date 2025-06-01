@@ -3,15 +3,14 @@ import { Dayjs } from "dayjs";
 import dayjs from "dayjs";
 import { Button, DatePicker, Form, Input, Select } from "antd";
 
-interface TripFormData {
+export interface TripFormData {
   tripName?: string;
   destination?: string;
   dateRange?: [Dayjs, Dayjs];
   participants?: string[];
 }
 
-interface TripFormProps {
-  mode: "create" | "edit";
+export interface TripFormProps {
   initialValues?: {
     name?: string;
     description?: string;
@@ -21,12 +20,13 @@ interface TripFormProps {
   onSubmit: (data: TripFormData) => Promise<void>;
 }
 
-export const TripForm = ({ mode, initialValues, onSubmit }: TripFormProps) => {
+export const TripForm = ({ initialValues, onSubmit }: TripFormProps) => {
   const [form] = Form.useForm();
   const [submitting, setSubmitting] = useState(false);
+  const isCreateMode = initialValues === undefined;
 
   useEffect(() => {
-    if (mode === "edit" && initialValues) {
+    if (initialValues) {
       const dateRange: [Dayjs, Dayjs] | undefined =
         initialValues.start_date && initialValues.end_date
           ? [dayjs(initialValues.start_date), dayjs(initialValues.end_date)]
@@ -38,15 +38,12 @@ export const TripForm = ({ mode, initialValues, onSubmit }: TripFormProps) => {
         dateRange,
       });
     }
-  }, [form, mode, initialValues]);
+  }, [form, initialValues]);
 
   const handleSubmit = async (values: TripFormData) => {
     try {
       setSubmitting(true);
       await onSubmit(values);
-      if (mode === "create") {
-        form.resetFields();
-      }
     } catch (error) {
       // Error handling is done in the parent component
     } finally {
@@ -57,7 +54,7 @@ export const TripForm = ({ mode, initialValues, onSubmit }: TripFormProps) => {
   return (
     <div className="w-full max-w-6xl mx-auto p-8 rounded-lg shadow-md bg-white">
       <h1 className="text-3xl font-bold mb-8">
-        {mode === "create" ? "Create a new trip" : "Edit trip"}
+        {isCreateMode ? "Create a new trip" : "Edit trip"}
       </h1>
 
       <Form
