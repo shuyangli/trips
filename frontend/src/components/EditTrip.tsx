@@ -36,7 +36,7 @@ export const EditTrip = () => {
         navigate("/");
         return;
       }
-      
+
       try {
         const response = await axiosInstance.get<TripDetails>(`/api/v1/trips/${tripId}`);
         setTrip(response.data);
@@ -59,10 +59,10 @@ export const EditTrip = () => {
 
   const handleSubmit = async (data: TripFormData) => {
     if (!tripId) return;
-    
+
     const { tripName, destination, dateRange, participants } = data;
     const [startDate, endDate] = dateRange ?? [];
-    
+
     setSubmitting(true);
     try {
       // Update trip details
@@ -75,7 +75,7 @@ export const EditTrip = () => {
 
       // Send invitations to new participants
       if (participants && participants.length > 0) {
-        const invitationPromises = participants.map(email => 
+        const invitationPromises = participants.map(email =>
           axiosInstance.post(`/api/v1/trips/${tripId}/invite`, {
             email: email.trim()
           }).catch(error => {
@@ -85,7 +85,7 @@ export const EditTrip = () => {
         );
 
         await Promise.allSettled(invitationPromises);
-        
+
         const successfulInvites = participants.length;
         if (successfulInvites > 0) {
           message.success(`Trip updated! Invitations sent to ${successfulInvites} additional participant${successfulInvites > 1 ? 's' : ''}.`);
@@ -132,13 +132,11 @@ export const EditTrip = () => {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-white">
-      <TripForm 
-        mode="edit" 
-        initialValues={trip}
-        onSubmit={handleSubmit}
-        loading={submitting}
-      />
-    </div>
+    <TripForm
+      mode="edit"
+      initialValues={trip}
+      onSubmit={handleSubmit}
+      loading={submitting}
+    />
   );
 };

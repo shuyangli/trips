@@ -18,7 +18,7 @@ export const CreateTrip = () => {
   const handleSubmit = async (data: TripFormData) => {
     const { tripName, destination, dateRange, participants } = data;
     const [startDate, endDate] = dateRange ?? [];
-    
+
     setLoading(true);
     try {
       const tripResponse = await axiosInstance.post("/api/v1/trips", {
@@ -32,7 +32,7 @@ export const CreateTrip = () => {
 
       // Send invitations to participants
       if (participants && participants.length > 0) {
-        const invitationPromises = participants.map(email => 
+        const invitationPromises = participants.map(email =>
           axiosInstance.post(`/api/v1/trips/${createdTrip.trip_id}/invite`, {
             email: email.trim()
           }).catch(error => {
@@ -42,7 +42,7 @@ export const CreateTrip = () => {
         );
 
         await Promise.allSettled(invitationPromises);
-        
+
         const successfulInvites = participants.length;
         if (successfulInvites > 0) {
           message.success(`Trip created! Invitations sent to ${successfulInvites} participant${successfulInvites > 1 ? 's' : ''}.`);
@@ -61,12 +61,10 @@ export const CreateTrip = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-white">
-      <TripForm 
-        mode="create" 
-        onSubmit={handleSubmit}
-        loading={loading}
-      />
-    </div>
+    <TripForm
+      mode="create"
+      onSubmit={handleSubmit}
+      loading={loading}
+    />
   );
 };
