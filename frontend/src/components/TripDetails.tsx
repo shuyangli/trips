@@ -6,6 +6,7 @@ import dayjs from "dayjs";
 import { axiosInstance } from "../api/axiosInstance";
 import { AuthStatusContext } from "../contexts/AuthStatusContext";
 import { ErrorView } from "./ErrorView";
+import { LoadingView } from "./LoadingView";
 
 interface TripDetails {
   trip_id: string;
@@ -105,14 +106,7 @@ export const TripDetailPage = () => {
   };
 
   if (loading || authStatus.loading) {
-    return (
-      <div className="w-full max-w-6xl mx-auto p-6">
-        <div className="flex flex-col items-center justify-center py-24">
-          <Spin size="large" />
-          <p className="mt-6 text-gray-600 text-lg">Loading trip details...</p>
-        </div>
-      </div>
-    );
+    return (<LoadingView details="Loading trip details..." />);
   }
 
   if (!authStatus.user) {

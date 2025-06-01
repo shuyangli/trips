@@ -6,6 +6,7 @@ import { axiosInstance } from "../api/axiosInstance";
 import { TripCard } from "./TripCard";
 import { AuthStatusContext } from "../contexts/AuthStatusContext";
 import { ErrorView } from "./ErrorView";
+import { LoadingView } from "./LoadingView";
 
 interface Trip {
   trip_id: string;
@@ -46,14 +47,7 @@ export const TripList = () => {
   }, [authStatus.user, authStatus.loading]);
 
   if (loading || authStatus.loading) {
-    return (
-      <div className="w-full max-w-5xl mx-auto p-6">
-        <div className="flex flex-col items-center justify-center py-24">
-          <Spin size="large" />
-          <p className="mt-6 text-gray-600 text-lg">Loading your trips...</p>
-        </div>
-      </div>
-    );
+    return (<LoadingView details="Loading your trips..." />);
   }
 
   if (!authStatus.user) {
