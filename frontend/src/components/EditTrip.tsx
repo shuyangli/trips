@@ -4,6 +4,7 @@ import { message, Spin } from "antd";
 import { axiosInstance } from "../api/axiosInstance";
 import { TripForm } from "./TripForm";
 import { AuthStatusContext } from "../contexts/AuthStatusContext";
+import { LoadingView } from "./LoadingView";
 
 interface TripFormData {
   tripName?: string;
@@ -28,7 +29,6 @@ export const EditTrip = () => {
   const authStatus = useContext(AuthStatusContext);
   const [trip, setTrip] = useState<TripDetails | null>(null);
   const [loading, setLoading] = useState(true);
-  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchTripDetails = async () => {
@@ -63,7 +63,6 @@ export const EditTrip = () => {
     const { tripName, destination, dateRange, participants } = data;
     const [startDate, endDate] = dateRange ?? [];
 
-    setSubmitting(true);
     try {
       // Update trip details
       await axiosInstance.put(`/api/v1/trips/${tripId}`, {
@@ -101,18 +100,11 @@ export const EditTrip = () => {
       console.error(error);
       message.error("Failed to update trip. Please try again.");
       throw error;
-    } finally {
-      setSubmitting(false);
     }
   };
 
   if (loading || authStatus.loading) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-white">
-        <Spin size="large" />
-        <p className="mt-4 text-gray-600">Loading trip details...</p>
-      </div>
-    );
+    return (<LoadingView details="Loading trip details..." />);
   }
 
   if (!authStatus.user) {
@@ -136,7 +128,6 @@ export const EditTrip = () => {
       mode="edit"
       initialValues={trip}
       onSubmit={handleSubmit}
-      loading={submitting}
     />
   );
 };

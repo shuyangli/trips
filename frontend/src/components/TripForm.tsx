@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Dayjs } from "dayjs";
 import dayjs from "dayjs";
 import { Button, DatePicker, Form, Input, Select } from "antd";
@@ -19,11 +19,11 @@ interface TripFormProps {
     end_date?: string;
   };
   onSubmit: (data: TripFormData) => Promise<void>;
-  loading?: boolean;
 }
 
-export const TripForm = ({ mode, initialValues, onSubmit, loading }: TripFormProps) => {
+export const TripForm = ({ mode, initialValues, onSubmit }: TripFormProps) => {
   const [form] = Form.useForm();
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (mode === "edit" && initialValues) {
@@ -42,12 +42,15 @@ export const TripForm = ({ mode, initialValues, onSubmit, loading }: TripFormPro
 
   const handleSubmit = async (values: TripFormData) => {
     try {
+      setSubmitting(true);
       await onSubmit(values);
       if (mode === "create") {
         form.resetFields();
       }
     } catch (error) {
       // Error handling is done in the parent component
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -109,9 +112,9 @@ export const TripForm = ({ mode, initialValues, onSubmit, loading }: TripFormPro
           className="w-full"
           type="primary"
           htmlType="submit"
-          loading={loading}
+          loading={submitting}
         >
-          {mode === "create" ? "Create trip" : "Save changes"}
+          Save
         </Button>
       </Form>
     </div>

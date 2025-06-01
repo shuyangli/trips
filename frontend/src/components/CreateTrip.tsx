@@ -13,13 +13,11 @@ interface TripFormData {
 
 export const CreateTrip = () => {
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (data: TripFormData) => {
     const { tripName, destination, dateRange, participants } = data;
     const [startDate, endDate] = dateRange ?? [];
 
-    setLoading(true);
     try {
       const tripResponse = await axiosInstance.post("/api/v1/trips", {
         name: tripName,
@@ -55,8 +53,6 @@ export const CreateTrip = () => {
       console.error(error);
       message.error("Failed to create trip. Please try again.");
       throw error; // Re-throw to prevent form reset
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -64,7 +60,6 @@ export const CreateTrip = () => {
     <TripForm
       mode="create"
       onSubmit={handleSubmit}
-      loading={loading}
     />
   );
 };
