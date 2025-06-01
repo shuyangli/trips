@@ -6,6 +6,9 @@
 - [ ] There should be an automatic itinerary entry functionality (through Chrome extensions for now, but it should also support email forwarding). Email forwarding should create custom recipient emails for each user, since users may use multiple emails for different external services.
 - [ ] Support email + password sign-up and sign-in.
 - [ ] Add a view for itineraries that are not attached to trips, and allow manually associating them to trips.
+- [ ] Remove TripSegments.
+- [ ] Set up deployment for both frontend and backend.
+- [ ] Set up CI and CD.
 
 # Milestones
 
@@ -17,4 +20,5 @@
 1. Get a quick and dirty CRUD working for trips (Done.)
 1. Get a quick and dirty CRUD working for trip itineraries (WIP)
 1. Get trip sharing working (Done).
-1. Build some automatic data import mechanism - perhaps chrome extension or email based ingestion
+1. Restructure TripSegments - it seems too complicated to manage, so let's remove it. Let's have itinerary items (specifically transportation) linkable into multiple trips.
+1. Build some automatic data import mechanism - perhaps chrome extension or email based ingestion.
