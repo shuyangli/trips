@@ -119,7 +119,7 @@ class ActivityItineraryItem(ItineraryItemBase):
 
 
 # Create/Update schemas (without auto-generated fields)
-class ItineraryItemCreate(BaseModel):
+class CreateItineraryItemRequest(BaseModel):
     """Schema for creating itinerary items."""
 
     trip_id: str | None = None

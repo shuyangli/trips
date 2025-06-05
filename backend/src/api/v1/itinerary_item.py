@@ -16,7 +16,7 @@ from src.database.crud.itinerary_item import (
 )
 from src.schemas.itinerary_item import (
     ItineraryItem,
-    ItineraryItemCreate,
+    CreateItineraryItemRequest,
     ItineraryItemUpdate,
     ItineraryItemType,
     FlightItineraryItem,
@@ -49,7 +49,7 @@ def _validate_itinerary_item(item_data: Any) -> ItineraryItem:
 
 @router.post("/itinerary-items", response_model=ItineraryItem)
 def create_itinerary_item(
-    item: ItineraryItemCreate,
+    item: CreateItineraryItemRequest,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ) -> ItineraryItem:
