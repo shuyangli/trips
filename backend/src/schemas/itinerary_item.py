@@ -1,23 +1,14 @@
 from datetime import datetime
-from enum import StrEnum
 from typing import Any, Union
 import uuid
 from pydantic import BaseModel, ConfigDict, Field, field_validator, computed_field
 
-
-class ItineraryItemType(StrEnum):
-    UNKNOWN = "unknown"
-    FLIGHT = "flight"
-    # Trains and buses
-    GROUND_TRANSPORTATION = "ground"
-    CAR_RENTAL = "car_rental"
-    ACCOMMODATION = "accommodation"
-    ACTIVITY = "activity"
+from src.database.models import ItineraryItemType
 
 
 class ItineraryItemBase(BaseModel):
     """Base class for all itinerary items with common fields."""
-    
+
     itinerary_item_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     trip_id: str | None = None
     created_by_user_id: str
@@ -27,8 +18,8 @@ class ItineraryItemBase(BaseModel):
     booking_url: str | None = None
     notes: str | None = None
     raw_details_json: dict[str, Any] | None = None
-    created_at: datetime | None = None
-    updated_at: datetime | None = None
+    created_at: datetime
+    updated_at: datetime
 
     model_config = ConfigDict(from_attributes=True, extra="forbid")
 
@@ -56,7 +47,7 @@ class FlightItineraryItem(ItineraryItemBase):
 
     transport_carrier: str | None = None
     transport_number: str | None = None
-    
+
     @computed_field
     @property
     def computed_itinerary_datetime(self) -> datetime:
@@ -75,7 +66,7 @@ class GroundTransportationItineraryItem(ItineraryItemBase):
 
     transport_carrier: str | None = None
     transport_number: str | None = None
-    
+
     @computed_field
     @property
     def computed_itinerary_datetime(self) -> datetime:
@@ -91,7 +82,7 @@ class CarRentalItineraryItem(ItineraryItemBase):
 
     pickup_datetime: datetime
     dropoff_datetime: datetime
-    
+
     @computed_field
     @property
     def computed_itinerary_datetime(self) -> datetime:
@@ -105,7 +96,7 @@ class AccommodationItineraryItem(ItineraryItemBase):
 
     check_in_datetime: datetime
     check_out_datetime: datetime
-    
+
     @computed_field
     @property
     def computed_itinerary_datetime(self) -> datetime:
@@ -120,23 +111,17 @@ class ActivityItineraryItem(ItineraryItemBase):
 
     start_datetime: datetime
     end_datetime: datetime | None = None
-    
+
     @computed_field
     @property
     def computed_itinerary_datetime(self) -> datetime:
         return self.start_datetime
 
 
-# Response schema that matches the database model
-class ItineraryItemResponse(ItineraryItemBase):
-    """Schema for itinerary item responses from the API."""
-    created_at: datetime
-    updated_at: datetime
-
-
 # Create/Update schemas (without auto-generated fields)
 class ItineraryItemCreate(BaseModel):
     """Schema for creating itinerary items."""
+
     trip_id: str | None = None
     type: ItineraryItemType
     itinerary_datetime: datetime | None = None
@@ -161,6 +146,7 @@ class ItineraryItemCreate(BaseModel):
 
 class ItineraryItemUpdate(BaseModel):
     """Schema for updating itinerary items."""
+
     trip_id: str | None = None
     type: ItineraryItemType | None = None
     itinerary_datetime: datetime | None = None
@@ -186,8 +172,8 @@ class ItineraryItemUpdate(BaseModel):
 # Union type for discriminated union based on type field
 ItineraryItem = Union[
     FlightItineraryItem,
-    GroundTransportationItineraryItem, 
+    GroundTransportationItineraryItem,
     CarRentalItineraryItem,
     AccommodationItineraryItem,
-    ActivityItineraryItem
+    ActivityItineraryItem,
 ]

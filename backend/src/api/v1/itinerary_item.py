@@ -15,21 +15,44 @@ from src.database.crud.itinerary_item import (
     delete_itinerary_item,
 )
 from src.schemas.itinerary_item import (
-    ItineraryItemResponse,
+    ItineraryItem,
     ItineraryItemCreate,
     ItineraryItemUpdate,
+    ItineraryItemType,
+    FlightItineraryItem,
+    GroundTransportationItineraryItem,
+    CarRentalItineraryItem,
+    AccommodationItineraryItem,
+    ActivityItineraryItem,
 )
 
 router = APIRouter()
 logger = logging.Logger(__name__)
 
 
-@router.post("/itinerary-items", response_model=ItineraryItemResponse)
+def _validate_itinerary_item(item_data: Any) -> ItineraryItem:
+    """Validate and convert database item to the appropriate itinerary item type."""
+    item_type = item_data.type
+    if item_type == ItineraryItemType.FLIGHT:
+        return FlightItineraryItem.model_validate(item_data)
+    elif item_type == ItineraryItemType.GROUND_TRANSPORTATION:
+        return GroundTransportationItineraryItem.model_validate(item_data)
+    elif item_type == ItineraryItemType.CAR_RENTAL:
+        return CarRentalItineraryItem.model_validate(item_data)
+    elif item_type == ItineraryItemType.ACCOMMODATION:
+        return AccommodationItineraryItem.model_validate(item_data)
+    elif item_type == ItineraryItemType.ACTIVITY:
+        return ActivityItineraryItem.model_validate(item_data)
+    else:
+        raise ValueError(f"Unknown itinerary item type: {item_type}")
+
+
+@router.post("/itinerary-items", response_model=ItineraryItem)
 def create_itinerary_item(
     item: ItineraryItemCreate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-) -> ItineraryItemResponse:
+) -> ItineraryItem:
     """Create a new itinerary item."""
     try:
         # Convert trip_id to UUID if provided
@@ -61,7 +84,7 @@ def create_itinerary_item(
                 detail="Itinerary item creation failed to return item data.",
             )
 
-        return ItineraryItemResponse.model_validate(item_response)
+        return _validate_itinerary_item(item_response)
 
     except Exception as e:
         logger.error(f"Error creating itinerary item: {e}")
@@ -71,12 +94,12 @@ def create_itinerary_item(
         )
 
 
-@router.get("/itinerary-items", response_model=list[ItineraryItemResponse])
+@router.get("/itinerary-items", response_model=list[ItineraryItem])
 def get_itinerary_items(
     trip_id: Optional[str] = Query(None, description="Filter by trip ID"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-) -> list[ItineraryItemResponse]:
+) -> list[ItineraryItem]:
     """Get itinerary items for the current user, optionally filtered by trip."""
     try:
         # Convert trip_id to UUID if provided
@@ -96,7 +119,7 @@ def get_itinerary_items(
             trip_id=trip_uuid,
         )
 
-        return [ItineraryItemResponse.model_validate(item) for item in items_data]
+        return [_validate_itinerary_item(item) for item in items_data]
 
     except Exception as e:
         logger.error(f"Error fetching itinerary items: {e}")
@@ -106,12 +129,12 @@ def get_itinerary_items(
         )
 
 
-@router.get("/itinerary-items/{item_id}", response_model=ItineraryItemResponse)
+@router.get("/itinerary-items/{item_id}", response_model=ItineraryItem)
 def get_itinerary_item(
     item_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-) -> ItineraryItemResponse:
+) -> ItineraryItem:
     """Get a specific itinerary item by ID."""
     try:
         # Convert string item_id to UUID
@@ -130,7 +153,7 @@ def get_itinerary_item(
                 detail="Itinerary item not found or you don't have access to it",
             )
 
-        return ItineraryItemResponse.model_validate(item_data)
+        return _validate_itinerary_item(item_data)
 
     except ValueError:
         raise HTTPException(
@@ -145,13 +168,13 @@ def get_itinerary_item(
         )
 
 
-@router.put("/itinerary-items/{item_id}", response_model=ItineraryItemResponse)
+@router.put("/itinerary-items/{item_id}", response_model=ItineraryItem)
 def update_itinerary_item_endpoint(
     item_id: str,
     item_update: ItineraryItemUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
-) -> ItineraryItemResponse:
+) -> ItineraryItem:
     """Update an itinerary item."""
     try:
         # Convert string item_id to UUID
@@ -188,7 +211,7 @@ def update_itinerary_item_endpoint(
                 detail="Itinerary item not found or you don't have permission to update it",
             )
 
-        return ItineraryItemResponse.model_validate(updated_item)
+        return _validate_itinerary_item(updated_item)
 
     except ValueError:
         raise HTTPException(
