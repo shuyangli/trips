@@ -119,8 +119,8 @@ class ActivityItineraryItem(ItineraryItemBase):
 
 
 # Create/Update schemas (without auto-generated fields)
-class CreateItineraryItemRequest(BaseModel):
-    """Schema for creating itinerary items."""
+class CreateItineraryItemRequestBase(BaseModel):
+    """Base schema for creating itinerary items."""
 
     trip_id: str | None = None
     type: ItineraryItemType
@@ -142,6 +142,59 @@ class CreateItineraryItemRequest(BaseModel):
         if not isinstance(v, str):
             raise ValueError(f"Invalid value {v} for str-like field.")
         return v
+
+
+class CreateFlightItineraryItemRequest(CreateItineraryItemRequestBase):
+    type: ItineraryItemType = ItineraryItemType.FLIGHT
+    origin_airport_code: str
+    destination_airport_code: str
+    departure_datetime: datetime
+    arrival_datetime: datetime
+    transport_carrier: str | None = None
+    transport_number: str | None = None
+
+
+class CreateGroundTransportationItineraryItemRequest(CreateItineraryItemRequestBase):
+    type: ItineraryItemType = ItineraryItemType.GROUND_TRANSPORTATION
+    origin_detail: str
+    destination_detail: str
+    departure_datetime: datetime
+    arrival_datetime: datetime
+    transport_carrier: str | None = None
+    transport_number: str | None = None
+
+
+class CreateCarRentalItineraryItemRequest(CreateItineraryItemRequestBase):
+    type: ItineraryItemType = ItineraryItemType.CAR_RENTAL
+    pickup_location: str
+    dropoff_location: str | None = None
+    pickup_datetime: datetime
+    dropoff_datetime: datetime
+
+
+class CreateAccommodationItineraryItemRequest(CreateItineraryItemRequestBase):
+    type: ItineraryItemType = ItineraryItemType.ACCOMMODATION
+    address: str
+    check_in_datetime: datetime
+    check_out_datetime: datetime
+
+
+class CreateActivityItineraryItemRequest(CreateItineraryItemRequestBase):
+    type: ItineraryItemType = ItineraryItemType.ACTIVITY
+    description: str | None = None
+    location_name: str | None = None
+    start_datetime: datetime
+    end_datetime: datetime | None = None
+
+
+# Union type for create request discriminated union based on type field
+CreateItineraryItemRequest = Union[
+    CreateFlightItineraryItemRequest,
+    CreateGroundTransportationItineraryItemRequest,
+    CreateCarRentalItineraryItemRequest,
+    CreateAccommodationItineraryItemRequest,
+    CreateActivityItineraryItemRequest,
+]
 
 
 class ItineraryItemUpdate(BaseModel):
