@@ -171,7 +171,15 @@ export const TripDetailPage = () => {
 
       {/* Itinerary Section */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Itinerary</h2>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">Itinerary</h2>
+          <Button
+            type="primary"
+            onClick={() => navigate(`/trip/${trip.trip_id}/createItinerary`)}
+          >
+            Add Itinerary Item
+          </Button>
+        </div>
 
         {trip.itinerary_items.length === 0 ? (
           <Empty
