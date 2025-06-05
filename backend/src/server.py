@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import logging
 
-from src.api.v1 import signin, trip
+from src.api.v1 import signin, trip, itinerary_item
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -32,6 +32,7 @@ app.add_middleware(
 
 app.include_router(signin.router, tags=["auth"])
 app.include_router(trip.router, prefix="/api/v1", tags=["trip"])
+app.include_router(itinerary_item.router, prefix="/api/v1", tags=["itinerary"])
 
 @app.get("/healthz")
 async def health_check():

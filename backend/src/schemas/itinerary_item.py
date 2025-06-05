@@ -1,8 +1,8 @@
 from datetime import datetime
 from enum import StrEnum
-from typing import Any
+from typing import Any, Union
 import uuid
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, computed_field
 
 
 class ItineraryItemType(StrEnum):
@@ -15,97 +15,20 @@ class ItineraryItemType(StrEnum):
     ACTIVITY = "activity"
 
 
-class FlightItineraryItem(BaseModel):
-    type: ItineraryItemType = ItineraryItemType.FLIGHT
-
-    # Ideally these are displayed with timezone in mind.
-    origin_airport_code: str
-    destination_airport_code: str
-
-    departure_datetime: datetime
-    arrival_datetime: datetime
-
-    transport_carrier: str | None = None
-    transport_number: str | None = None
-
-
-class GroundTransportationItineraryItem(BaseModel):
-    type: ItineraryItemType = ItineraryItemType.GROUND_TRANSPORTATION
-
-    # Ideally these are displayed with timezone in mind.
-    origin_detail: str
-    destination_detail: str
-
-    departure_datetime: datetime
-    arrival_datetime: datetime
-
-    transport_carrier: str | None = None
-    transport_number: str | None = None
-
-
-class CarRentalItineraryItem(BaseModel):
-    type: ItineraryItemType = ItineraryItemType.CAR_RENTAL
-
-    # Ideally these are displayed with timezone in mind.
-    pickup_location: str
-    dropoff_location: str | None = None
-
-    pickup_datetime: datetime
-    dropoff_datetime: datetime
-
-
-class AccommodationItineraryItem(BaseModel):
-    type: ItineraryItemType = ItineraryItemType.ACCOMMODATION
-
-    address: str
-
-    check_in_datetime: datetime
-    check_out_datetime: datetime
-
-
-class ActivityItineraryItem(BaseModel):
-    type: ItineraryItemType = ItineraryItemType.ACTIVITY
-
-    description: str | None = None
-    location_name: str | None = None
-
-    start_datetime: datetime
-    end_datetime: datetime | None
-
-
-class ItineraryItem(BaseModel):
-    """An item in an itinerary, representing a single travel booking (e.g. flight or train),
-    accommodation (e.g. hotel or airbnb), or activity (e.g. dining reservation, museum visit).
-    """
-
+class ItineraryItemBase(BaseModel):
+    """Base class for all itinerary items with common fields."""
+    
     itinerary_item_id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-
-    # FK to Trip.trip_id
     trip_id: str | None = None
-
-    # FK to User.user_id
     created_by_user_id: str
-
-    # Used for sorting and filtering only
+    type: ItineraryItemType
     itinerary_datetime: datetime | None = None
-
-    # Reference for the booking: PNR, hotel confirmation number, etc.
     booking_reference: str | None = None
-    # Link to the booking, especially for activities or dining reservations.
     booking_url: str | None = None
-
-    # Other notes about the item
     notes: str | None = None
-
-    # Other semi-structured or unstructured data
     raw_details_json: dict[str, Any] | None = None
-
-    # Perhaps this should support attachments too for things like receipts or tickets.
-
-    created_at: datetime
-    updated_at: datetime
-
-    # Maybe keep track of price too?
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
 
     model_config = ConfigDict(from_attributes=True, extra="forbid")
 
@@ -119,3 +42,152 @@ class ItineraryItem(BaseModel):
         if not isinstance(v, str):
             raise ValueError(f"Invalid value {v} for str-like field.")
         return v
+
+
+class FlightItineraryItem(ItineraryItemBase):
+    type: ItineraryItemType = ItineraryItemType.FLIGHT
+
+    # Ideally these are displayed with timezone in mind.
+    origin_airport_code: str
+    destination_airport_code: str
+
+    departure_datetime: datetime
+    arrival_datetime: datetime
+
+    transport_carrier: str | None = None
+    transport_number: str | None = None
+    
+    @computed_field
+    @property
+    def computed_itinerary_datetime(self) -> datetime:
+        return self.departure_datetime
+
+
+class GroundTransportationItineraryItem(ItineraryItemBase):
+    type: ItineraryItemType = ItineraryItemType.GROUND_TRANSPORTATION
+
+    # Ideally these are displayed with timezone in mind.
+    origin_detail: str
+    destination_detail: str
+
+    departure_datetime: datetime
+    arrival_datetime: datetime
+
+    transport_carrier: str | None = None
+    transport_number: str | None = None
+    
+    @computed_field
+    @property
+    def computed_itinerary_datetime(self) -> datetime:
+        return self.departure_datetime
+
+
+class CarRentalItineraryItem(ItineraryItemBase):
+    type: ItineraryItemType = ItineraryItemType.CAR_RENTAL
+
+    # Ideally these are displayed with timezone in mind.
+    pickup_location: str
+    dropoff_location: str | None = None
+
+    pickup_datetime: datetime
+    dropoff_datetime: datetime
+    
+    @computed_field
+    @property
+    def computed_itinerary_datetime(self) -> datetime:
+        return self.pickup_datetime
+
+
+class AccommodationItineraryItem(ItineraryItemBase):
+    type: ItineraryItemType = ItineraryItemType.ACCOMMODATION
+
+    address: str
+
+    check_in_datetime: datetime
+    check_out_datetime: datetime
+    
+    @computed_field
+    @property
+    def computed_itinerary_datetime(self) -> datetime:
+        return self.check_in_datetime
+
+
+class ActivityItineraryItem(ItineraryItemBase):
+    type: ItineraryItemType = ItineraryItemType.ACTIVITY
+
+    description: str | None = None
+    location_name: str | None = None
+
+    start_datetime: datetime
+    end_datetime: datetime | None = None
+    
+    @computed_field
+    @property
+    def computed_itinerary_datetime(self) -> datetime:
+        return self.start_datetime
+
+
+# Response schema that matches the database model
+class ItineraryItemResponse(ItineraryItemBase):
+    """Schema for itinerary item responses from the API."""
+    created_at: datetime
+    updated_at: datetime
+
+
+# Create/Update schemas (without auto-generated fields)
+class ItineraryItemCreate(BaseModel):
+    """Schema for creating itinerary items."""
+    trip_id: str | None = None
+    type: ItineraryItemType
+    itinerary_datetime: datetime | None = None
+    booking_reference: str | None = None
+    booking_url: str | None = None
+    notes: str | None = None
+    raw_details_json: dict[str, Any] | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+    @field_validator("trip_id", mode="before")
+    @classmethod
+    def uuid_to_string(cls, v: Any) -> str | None:
+        if v is None:
+            return None
+        if isinstance(v, uuid.UUID):
+            return str(v)
+        if not isinstance(v, str):
+            raise ValueError(f"Invalid value {v} for str-like field.")
+        return v
+
+
+class ItineraryItemUpdate(BaseModel):
+    """Schema for updating itinerary items."""
+    trip_id: str | None = None
+    type: ItineraryItemType | None = None
+    itinerary_datetime: datetime | None = None
+    booking_reference: str | None = None
+    booking_url: str | None = None
+    notes: str | None = None
+    raw_details_json: dict[str, Any] | None = None
+
+    model_config = ConfigDict(extra="forbid")
+
+    @field_validator("trip_id", mode="before")
+    @classmethod
+    def uuid_to_string(cls, v: Any) -> str | None:
+        if v is None:
+            return None
+        if isinstance(v, uuid.UUID):
+            return str(v)
+        if not isinstance(v, str):
+            raise ValueError(f"Invalid value {v} for str-like field.")
+        return v
+
+
+# Union type for discriminated union based on type field
+ItineraryItem = Union[
+    FlightItineraryItem,
+    GroundTransportationItineraryItem, 
+    CarRentalItineraryItem,
+    AccommodationItineraryItem,
+    ActivityItineraryItem
+]
