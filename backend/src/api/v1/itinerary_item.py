@@ -20,11 +20,6 @@ from src.schemas.itinerary_item import (
     CreateItineraryItemRequest,
     ItineraryItemUpdate,
     ItineraryItemType,
-    FlightItineraryItem,
-    GroundTransportationItineraryItem,
-    CarRentalItineraryItem,
-    AccommodationItineraryItem,
-    ActivityItineraryItem,
 )
 
 router = APIRouter()
@@ -33,19 +28,7 @@ logger = logging.Logger(__name__)
 
 def _validate_itinerary_item(item_data: Any) -> ItineraryItem:
     """Validate and convert database item to the appropriate itinerary item type."""
-    item_type = item_data.type
-    if item_type == ItineraryItemType.FLIGHT:
-        return FlightItineraryItem.model_validate(item_data)
-    elif item_type == ItineraryItemType.GROUND_TRANSPORTATION:
-        return GroundTransportationItineraryItem.model_validate(item_data)
-    elif item_type == ItineraryItemType.CAR_RENTAL:
-        return CarRentalItineraryItem.model_validate(item_data)
-    elif item_type == ItineraryItemType.ACCOMMODATION:
-        return AccommodationItineraryItem.model_validate(item_data)
-    elif item_type == ItineraryItemType.ACTIVITY:
-        return ActivityItineraryItem.model_validate(item_data)
-    else:
-        raise ValueError(f"Unknown itinerary item type: {item_type}")
+    return ItineraryItem.model_validate(item_data)
 
 
 @router.post("/itinerary-items", response_model=ItineraryItem)
@@ -76,7 +59,7 @@ def create_itinerary_item(
             booking_reference=item.booking_reference,
             booking_url=item.booking_url,
             notes=item.notes,
-            raw_details_json=item.raw_details_json,
+            details=item.details,
         )
 
         if not item_response:
@@ -203,7 +186,7 @@ def update_itinerary_item_endpoint(
             booking_reference=item_update.booking_reference,
             booking_url=item_update.booking_url,
             notes=item_update.notes,
-            raw_details_json=item_update.raw_details_json,
+            details=item_update.details,
         )
 
         if not updated_item:

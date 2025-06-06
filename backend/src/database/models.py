@@ -35,7 +35,8 @@ class ParticipantStatus(StrEnum):
 class ItineraryItemType(StrEnum):
     UNKNOWN = "unknown"
     FLIGHT = "flight"
-    GROUND_TRANSPORTATION = "ground"
+    BUS = "bus"
+    TRAIN = "train"
     CAR_RENTAL = "car_rental"
     ACCOMMODATION = "accommodation"
     ACTIVITY = "activity"
@@ -196,7 +197,7 @@ itinerary_items = Table(
     Column("booking_reference", String, nullable=True),
     Column("booking_url", String, nullable=True),
     Column("notes", String, nullable=True),
-    Column("raw_details_json", JSON, nullable=True),
+    Column("details", JSON, nullable=True),
     Column(
         "created_at",
         TIMESTAMP(timezone=True),

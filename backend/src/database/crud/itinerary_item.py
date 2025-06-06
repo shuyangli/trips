@@ -4,7 +4,13 @@ from typing import Any
 from sqlalchemy.orm import Session
 from sqlalchemy import insert, select, and_, or_, update, delete
 
-from src.database.models import itinerary_items, trips, trip_participants, ParticipantStatus, ItineraryItemType
+from src.database.models import (
+    itinerary_items,
+    trips,
+    trip_participants,
+    ParticipantStatus,
+    ItineraryItemType,
+)
 
 
 def create_itinerary_item(
@@ -16,7 +22,7 @@ def create_itinerary_item(
     booking_reference: str | None = None,
     booking_url: str | None = None,
     notes: str | None = None,
-    raw_details_json: dict[str, Any] | None = None,
+    details: dict[str, Any] | None = None,
 ) -> dict:
     """Create a new itinerary item."""
     item_insert_values = {
@@ -27,7 +33,7 @@ def create_itinerary_item(
         "booking_reference": booking_reference,
         "booking_url": booking_url,
         "notes": notes,
-        "raw_details_json": raw_details_json,
+        "details": details,
     }
 
     stmt_insert_item = (
@@ -42,7 +48,7 @@ def create_itinerary_item(
             itinerary_items.c.booking_reference,
             itinerary_items.c.booking_url,
             itinerary_items.c.notes,
-            itinerary_items.c.raw_details_json,
+            itinerary_items.c.details,
             itinerary_items.c.created_at,
             itinerary_items.c.updated_at,
         )
@@ -84,16 +90,18 @@ def user_has_itinerary_item_access(
                             select(trip_participants.c.trip_id).where(
                                 and_(
                                     trip_participants.c.user_id == user_id,
-                                    trip_participants.c.status.in_([
-                                        ParticipantStatus.INVITED, 
-                                        ParticipantStatus.JOINED
-                                    ])
+                                    trip_participants.c.status.in_(
+                                        [
+                                            ParticipantStatus.INVITED,
+                                            ParticipantStatus.JOINED,
+                                        ]
+                                    ),
                                 )
                             )
-                        )
-                    )
-                )
-            )
+                        ),
+                    ),
+                ),
+            ),
         )
     )
 
@@ -117,7 +125,7 @@ def get_itinerary_items_for_user(
         itinerary_items.c.booking_reference,
         itinerary_items.c.booking_url,
         itinerary_items.c.notes,
-        itinerary_items.c.raw_details_json,
+        itinerary_items.c.details,
         itinerary_items.c.created_at,
         itinerary_items.c.updated_at,
     ).where(
@@ -139,15 +147,17 @@ def get_itinerary_items_for_user(
                         select(trip_participants.c.trip_id).where(
                             and_(
                                 trip_participants.c.user_id == user_id,
-                                trip_participants.c.status.in_([
-                                    ParticipantStatus.INVITED, 
-                                    ParticipantStatus.JOINED
-                                ])
+                                trip_participants.c.status.in_(
+                                    [
+                                        ParticipantStatus.INVITED,
+                                        ParticipantStatus.JOINED,
+                                    ]
+                                ),
                             )
                         )
-                    )
-                )
-            )
+                    ),
+                ),
+            ),
         )
     )
 
@@ -158,7 +168,7 @@ def get_itinerary_items_for_user(
     # Order by itinerary_datetime, then created_at
     stmt = stmt.order_by(
         itinerary_items.c.itinerary_datetime.asc().nulls_last(),
-        itinerary_items.c.created_at.asc()
+        itinerary_items.c.created_at.asc(),
     )
 
     result = db.execute(stmt)
@@ -179,17 +189,17 @@ def get_itinerary_items_for_trip(
         itinerary_items.c.booking_reference,
         itinerary_items.c.booking_url,
         itinerary_items.c.notes,
-        itinerary_items.c.raw_details_json,
+        itinerary_items.c.details,
         itinerary_items.c.created_at,
         itinerary_items.c.updated_at,
     ).where(itinerary_items.c.trip_id == trip_id)
-    
+
     # Order by itinerary_datetime, then by created_at for items without datetime
     stmt = stmt.order_by(
         itinerary_items.c.itinerary_datetime.asc().nulls_last(),
-        itinerary_items.c.created_at.asc()
+        itinerary_items.c.created_at.asc(),
     )
-    
+
     result = db.execute(stmt)
     return [dict(row._mapping) for row in result.fetchall()]
 
@@ -214,7 +224,7 @@ def get_itinerary_item_by_id(
         itinerary_items.c.booking_reference,
         itinerary_items.c.booking_url,
         itinerary_items.c.notes,
-        itinerary_items.c.raw_details_json,
+        itinerary_items.c.details,
         itinerary_items.c.created_at,
         itinerary_items.c.updated_at,
     ).where(itinerary_items.c.itinerary_item_id == itinerary_item_id)
@@ -236,7 +246,7 @@ def update_itinerary_item(
     booking_reference: str | None = None,
     booking_url: str | None = None,
     notes: str | None = None,
-    raw_details_json: dict[str, Any] | None = None,
+    details: dict[str, Any] | None = None,
 ) -> dict | None:
     """Update an itinerary item if the user has access to it."""
     # First check if user has access
@@ -257,11 +267,11 @@ def update_itinerary_item(
         update_values["booking_url"] = booking_url
     if notes is not None:
         update_values["notes"] = notes
-    if raw_details_json is not None:
-        update_values["raw_details_json"] = raw_details_json
+    if details is not None:
+        update_values["details"] = details
 
     # Update the item
-    stmt_update = (
+    stmt = (
         update(itinerary_items)
         .where(itinerary_items.c.itinerary_item_id == itinerary_item_id)
         .values(update_values)
@@ -274,18 +284,18 @@ def update_itinerary_item(
             itinerary_items.c.booking_reference,
             itinerary_items.c.booking_url,
             itinerary_items.c.notes,
-            itinerary_items.c.raw_details_json,
+            itinerary_items.c.details,
             itinerary_items.c.created_at,
             itinerary_items.c.updated_at,
         )
     )
 
-    result = db.execute(stmt_update)
+    result = db.execute(stmt)
     db.commit()
-    updated_row = result.first()
-    if not updated_row:
+    row = result.first()
+    if not row:
         return None
-    return dict(updated_row._mapping)
+    return dict(row._mapping)
 
 
 def delete_itinerary_item(
@@ -299,10 +309,10 @@ def delete_itinerary_item(
         return False
 
     # Delete the item
-    stmt_delete = delete(itinerary_items).where(
+    stmt = delete(itinerary_items).where(
         itinerary_items.c.itinerary_item_id == itinerary_item_id
     )
 
-    result = db.execute(stmt_delete)
+    result = db.execute(stmt)
     db.commit()
     return result.rowcount > 0
