@@ -1,3 +1,4 @@
+import traceback
 import uuid
 from typing import Any, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
@@ -87,7 +88,7 @@ def create_itinerary_item(
         return _validate_itinerary_item(item_response)
 
     except Exception as e:
-        logger.error(f"Error creating itinerary item: {e}")
+        logger.error(f"Error fetching itinerary item: {traceback.format_exc()}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"An error occurred: {str(e)}",
@@ -161,7 +162,7 @@ def get_itinerary_item(
             detail="Invalid item ID format",
         )
     except Exception as e:
-        logger.error(f"Error fetching itinerary item: {e}")
+        logger.error(f"Error fetching itinerary item: {traceback.format_exc()}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"An error occurred: {str(e)}",
