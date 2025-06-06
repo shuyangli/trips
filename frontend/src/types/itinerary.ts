@@ -1,6 +1,8 @@
 export enum ItineraryItemType {
+  UNKNOWN = "unknown",
   FLIGHT = "flight",
-  GROUND_TRANSPORTATION = "ground",
+  BUS = "bus",
+  TRAIN = "train",
   CAR_RENTAL = "car_rental",
   ACCOMMODATION = "accommodation",
   ACTIVITY = "activity",

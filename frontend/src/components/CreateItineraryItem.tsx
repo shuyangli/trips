@@ -9,19 +9,24 @@ export const CreateItineraryItem = () => {
 
   const handleSubmit = async (data: ItineraryItemFormData) => {
     try {
-      // Convert Dayjs objects to ISO strings
+      // Convert Dayjs objects to ISO strings in details
+      const details = data.details ? {
+        ...data.details,
+        departure_datetime: data.details.departure_datetime?.toISOString(),
+        arrival_datetime: data.details.arrival_datetime?.toISOString(),
+        pickup_datetime: data.details.pickup_datetime?.toISOString(),
+        dropoff_datetime: data.details.dropoff_datetime?.toISOString(),
+        check_in_datetime: data.details.check_in_datetime?.toISOString(),
+        check_out_datetime: data.details.check_out_datetime?.toISOString(),
+        start_datetime: data.details.start_datetime?.toISOString(),
+        end_datetime: data.details.end_datetime?.toISOString(),
+      } : undefined;
+
       const formattedData = {
         ...data,
         trip_id: tripId, // Add the trip ID from the URL
         itinerary_datetime: data.itinerary_datetime?.toISOString(),
-        departure_datetime: data.departure_datetime?.toISOString(),
-        arrival_datetime: data.arrival_datetime?.toISOString(),
-        pickup_datetime: data.pickup_datetime?.toISOString(),
-        dropoff_datetime: data.dropoff_datetime?.toISOString(),
-        check_in_datetime: data.check_in_datetime?.toISOString(),
-        check_out_datetime: data.check_out_datetime?.toISOString(),
-        start_datetime: data.start_datetime?.toISOString(),
-        end_datetime: data.end_datetime?.toISOString(),
+        details,
       };
 
       await axiosInstance.post("/api/v1/itinerary-items", formattedData);
